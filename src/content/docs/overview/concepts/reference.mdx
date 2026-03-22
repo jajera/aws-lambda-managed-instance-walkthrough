@@ -1,0 +1,115 @@
+---
+title: Trade-offs, economics, and implementation reference
+description: Decision-oriented comparison with default Lambda, pricing and integrations, guardrails, pattern cards, and a concise implementation outline for LMI.
+sidebar:
+  label: Decision guide & reference
+---
+
+import { Aside, Badge, Card, CardGrid } from '@astrojs/starlight/components';
+
+Deeper **comparison**, **economics**, and **integrations** are consolidated here so **[LMI fundamentals](/aws-lambda-managed-instance-walkthrough/overview/concepts/)** articles stay concise. Account and local tooling live under **[Foundations](/aws-lambda-managed-instance-walkthrough/foundations/)** and **[Prerequisites](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/)**. Step-by-step apply procedures will ship under **[Walkthrough](/aws-lambda-managed-instance-walkthrough/walkthrough/)**; this page stays conceptual until those batches exist.
+
+<h2 id="comparison">Comparison</h2>
+
+| Dimension | Lambda (default) | LMI |
+| --- | --- | --- |
+| **Concurrency** | One execution environment handles at most **one** invocation at a time | **Multi-concurrent** invocations per environment — strong fit for **IO-heavy** work ([AWS](https://docs.aws.amazon.com/lambda/latest/dg/lambda-managed-instances.html)) |
+| **Tenancy** | **Multi-tenant**, **Firecracker** microVMs on **Shared Lambda infrastructure** | **Your account**, **Nitro** EC2, **containers**; **capacity provider** as security boundary |
+| **Pricing** | Per-request duration | EC2-style instance cost + **15%** management fee |
+| **Scaling** | Cold starts possible; **scales to zero** | CPU-based, asynchronous; **no cold starts** in the default-Lambda sense; baseline capacity per AWS docs |
+| **Best for** | Bursty / intermittent / scale-to-zero wins | Sustained, predictable throughput; EC2 pricing / hardware flexibility |
+
+## Supported instance types (requirements, not names)
+
+You declare **requirements** (for example `x86_64` vs `arm64`); Lambda picks a current-generation instance. A **family-level summary** (C / M / R × architecture, minimum size, and allow/exclude overrides) lives under [Placement & capacity — Supported instance families](/aws-lambda-managed-instance-walkthrough/overview/concepts/capacity-providers/#supported-instance-families). See [Lambda Managed Instances](https://docs.aws.amazon.com/lambda/latest/dg/lambda-managed-instances.html) and the [pricing page](https://aws.amazon.com/lambda/pricing/) for your region.
+
+```text
+  Lambda capacity provider
+  └── instance requirements
+        ├── architecture: x86_64   ──▶  Intel/AMD current-gen
+        └── architecture: arm64    ──▶  Graviton (e.g. Graviton4 where available)
+```
+
+## Pricing
+
+| Component | Calculation |
+| --- | --- |
+| **Instance cost** | EC2 On-Demand or discounted (Savings Plans / RIs on **compute**, not the fee) |
+| **Management fee** | **15%** on top of EC2 instance cost |
+| **Granularity** | EC2 hourly — not per-100 ms like default Lambda |
+| **Minimum cost** | Baseline capacity is always on — **zero traffic is not zero bill** |
+
+## Event source integrations
+
+LMI supports the **same event sources** as default Lambda ([AWS](https://docs.aws.amazon.com/lambda/latest/dg/lambda-managed-instances.html)).
+
+| Integration | Notes |
+| --- | --- |
+| **S3** | Object notifications and batch patterns |
+| **SQS** | High throughput benefits from multi-concurrency per environment |
+| **API Gateway / ALB** | Steady HTTP traffic — fewer latency spikes vs cold-start-heavy setups |
+| **SNS / EventBridge / Kinesis** | Same integration model as default Lambda |
+
+<h2 id="known-limitations">Out of scope and known limitations</h2>
+
+<Aside type="caution">
+  Several items are **hard constraints**, not toggles. Read before adopting LMI.
+</Aside>
+
+- **No scale-to-zero** — baseline capacity and cost even at idle.
+- **`capacity_provider_config` is immutable** after first function create.
+- **No normal EC2 admin** on managed instances — no SSH, ad-hoc terminate, etc. Decommission via capacity provider lifecycle ([AWS](https://docs.aws.amazon.com/lambda/latest/dg/lambda-managed-instances.html)).
+- **Multi-concurrency requires safe code** — shared process / threads / workers per runtime.
+- **Custom runtimes / containers** — confirm regional and product support in AWS docs.
+
+## Use-case patterns
+
+<CardGrid>
+  <Card title="Sustained HTTP / API traffic" icon="rocket">
+    <Badge text="Often LMI" variant="success" />
+    Steady traffic; multi-concurrency improves utilisation and latency predictability.
+  </Card>
+  <Card title="High-throughput queues" icon="seti:db">
+    <Badge text="Often LMI" variant="success" />
+    Many in-flight messages per execution environment without provisioning large reserved concurrency on default Lambda.
+  </Card>
+  <Card title="VPC-bound workloads" icon="seti:lock">
+    <Badge text="Often LMI" variant="success" />
+    Instances already in your VPC — avoids classic VPC-Lambda ENI cold-start behaviour.
+  </Card>
+  <Card title="Continuous log or data processing" icon="document">
+    <Badge text="Often LMI" variant="success" />
+    Sustained, event-driven pipelines where hourly EC2 + fee beats per-invocation pricing.
+  </Card>
+  <Card title="Sporadic / low volume" icon="warning">
+    <Badge text="Avoid LMI" variant="danger" />
+    Idle baseline cost dominates — default Lambda scale-to-zero is usually cheaper.
+  </Card>
+  <Card title="Short unpredictable bursts" icon="information">
+    <Badge text="Consider default Lambda" variant="caution" />
+    Fast scale-to-zero and on-demand environments often fit better than async CPU scaling.
+  </Card>
+</CardGrid>
+
+<h2 id="implementation-outline">Implementation outline</h2>
+
+Names are illustrative — this is a checklist of what you wire together, not a tutorial. **`capacity_provider_config` on the function is immutable** after first create ([AWS](https://docs.aws.amazon.com/lambda/latest/dg/lambda-managed-instances.html)). Use the AWS API, console, or your own automation; follow **Walkthrough** when procedural pages publish.
+
+### Capacity provider
+
+- **VPC** — VPC ID, private subnets, security groups for managed instances.
+- **Instance requirements** — architecture family (`x86_64` or `arm64`); AWS selects a current-generation instance type.
+- **Scaling** — mode (for example automatic) and an upper bound on vCPU the pool may use.
+- **Operator access** — attach the AWS managed policy that lets Lambda manage EC2 capacity on your behalf (`AWSLambdaManagedEC2ResourceOperator`).
+
+### Lambda function on LMI
+
+- **Runtime and handler** — match your language and entrypoint.
+- **Execution role** — standard Lambda trust; attach **`AWSLambdaBasicExecutionRole`** (and any data/API permissions your code needs).
+- **Publishing** — use a **published** function version for Managed Instances.
+- **Capacity provider link** — point the function at the capacity provider and set **max concurrency** per environment (immutable after first create).
+
+### IAM — two roles
+
+- **Execution role** — assumed by Lambda to run your code and write logs.
+- **Operator role** — assumed by the capacity-provider workflow; attach **`AWSLambdaManagedEC2ResourceOperator`** so Lambda can provision and lifecycle EC2 in your account.

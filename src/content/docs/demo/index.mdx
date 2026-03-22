@@ -1,0 +1,111 @@
+---
+title: Demo — WAF Logs to Grafana Loki
+description: End-to-end demo — WAF access logs flow from S3 to a Node.js 24 Lambda Managed Instance function to Loki and are visualised in Grafana.
+draft: true
+sidebar:
+  label: Demo overview
+---
+
+import { Aside, Steps, FileTree, Card, CardGrid } from '@astrojs/starlight/components';
+
+<Aside type="note">
+  Terraform code: [terraform-aws-lambda-managed-instance](https://github.com/jajera/terraform-aws-lambda-managed-instance).
+  All demo resources live under `examples/waf-loki/`.
+</Aside>
+
+This demo wires together every concept from the walkthrough into one running pipeline. WAF access log files land in S3, an S3 event triggers a **Node.js 24 Lambda Managed Instance (LMI) function** that decompresses and pushes each log line to **Grafana Loki** on EC2, and **Grafana** surfaces a live log stream behind a public ALB.
+
+## What the stack builds
+
+```text
+  AWS WAF access logs
+         │
+         ▼
+   Amazon S3 (bucket name you set in waf_logs_bucket_name)
+         │ S3:ObjectCreated
+         ▼
+   Lambda (LMI, Node.js 24)      ←── lambda_managed_instance
+         │ HTTP POST :3100
+         ▼
+   Loki (EC2, Docker Compose)
+         │
+         ▼
+   Grafana :3000 ←── ALB (public, HTTP 80)
+```
+
+<CardGrid>
+  <Card title="S3 trigger" icon="seti:json">
+    Any `.gz` object put to the WAF log bucket fires an S3 event notification directly to the LMI Lambda. No SQS or EventBridge needed for this volume.
+  </Card>
+  <Card title="Lambda Managed Instance" icon="rocket">
+    The Node.js 24 WAF ingest function runs on a `lambda_managed_instance` capacity provider with VPC placement and the LMI security group.
+  </Card>
+  <Card title="Loki on EC2" icon="linux">
+    Monolithic Loki (Docker Compose) on a single `t3.small` in a private subnet. Chunks and index persist on the root EBS volume. Lambda reaches Loki on port 3100 via the LMI security group rule.
+  </Card>
+  <Card title="Grafana via ALB" icon="external">
+    A public ALB forwards HTTP 80 to Grafana port 3000. Access is locked to your current deployer IP by default. Default credentials: **admin / admin**.
+  </Card>
+</CardGrid>
+
+## Repository layout
+
+<FileTree>
+- examples/
+  - waf-loki/
+    - main.tf              # VPC, LMI, WAF Lambda module, S3, EC2, ALB
+    - variables.tf         # waf_logs_bucket_name (required), waf_logs_prefix, web_acl_arn, …
+    - outputs.tf           # grafana_url, waf_logs_bucket, obs_instance_id, loki_push_url
+    - versions.tf          # aws, archive, http providers
+    - function-waf/        # Node.js 24 WAF ingest handler
+      - index.mjs
+      - package.json
+    - templates/
+      - user_data.sh.tftpl # EC2 bootstrap (Terraform templatefile + base64 dashboards)
+      - dashboards/        # waf.json, waf-overview.json → injected into user_data at apply
+    - README.md
+</FileTree>
+
+## Apply
+
+Create the WAF log S3 bucket (and any bucket policy WAF needs) **before** apply. Set `waf_logs_bucket_name` in `terraform.tfvars` to that bucket’s name.
+
+```bash frame="terminal"
+cd examples/waf-loki
+cp terraform.tfvars.example terraform.tfvars
+# edit: waf_logs_bucket_name = "<existing-bucket>"
+terraform init
+terraform plan
+terraform apply
+```
+
+First apply takes several minutes: capacity provider creation, EC2 startup, Docker image pulls, and the Grafana ALB health check all happen sequentially.
+
+## Check Grafana
+
+```bash frame="terminal"
+terraform output grafana_url
+# Open http://<alb-dns> in a browser — admin / admin
+```
+
+The **WAF Logs** dashboard appears under the **WAF** folder. The `{source="waf"}` stream is empty until a log object lands in the bucket.
+
+## Test the ingest path
+
+```bash frame="terminal"
+echo '{"timestamp":1735700000000,"action":"ALLOW","terminatingRuleId":"Default_Action","httpRequest":{"clientIp":"1.2.3.4","uri":"/","httpMethod":"GET"}}' \
+  | gzip > /tmp/test.log.gz
+
+aws s3 cp /tmp/test.log.gz \
+  "s3://$(terraform output -raw waf_logs_bucket)/test/test.log.gz"
+```
+
+The Lambda triggers automatically. Within seconds the log line appears in Grafana Explore.
+
+## Destroy
+
+```bash frame="terminal"
+terraform destroy
+```
+
+`terraform destroy` removes this stack’s resources (including the S3 event notification). It does **not** delete the WAF log bucket, which Terraform never creates.

@@ -1,0 +1,54 @@
+---
+title: AWS Lambda Managed Instances Walkthrough
+description: Terraform-first documentation for AWS Lambda Managed Instances — capacity provider, VPC, fundamentals through quotas, and how LMI differs from default Lambda.
+template: splash
+hero:
+  tagline: Theory-first — Introduction, then LMI fundamentals through quotas and reference. Hands-on — open Walkthrough for overview, Prerequisites, and build steps as pages publish.
+  actions:
+    - text: Get started
+      link: /aws-lambda-managed-instance-walkthrough/overview/
+      variant: primary
+      icon: right-arrow
+    - text: View on GitHub
+      link: https://github.com/jajera/aws-lambda-managed-instance-walkthrough
+      variant: secondary
+      icon: github
+---
+
+import { CardGrid } from '@astrojs/starlight/components';
+import LinkCardWithIcon from '@/components/LinkCardWithIcon.astro';
+import IconSiAmazonwebservices from '~icons/simple-icons/amazonwebservices';
+import IconMdiBookOpenVariant from '~icons/mdi/book-open-variant';
+import IconMdiSitemap from '~icons/mdi/sitemap';
+import IconMdiHammerWrench from '~icons/mdi/hammer-wrench';
+
+<CardGrid>
+  <LinkCardWithIcon
+    title="Introduction"
+    href="/aws-lambda-managed-instance-walkthrough/overview/"
+    description="Orientation — what LMI is, three-step flow, and how the site is organised (theory only)."
+  >
+    <IconSiAmazonwebservices slot="icon" aria-hidden />
+  </LinkCardWithIcon>
+  <LinkCardWithIcon
+    title="Walkthrough"
+    href="/aws-lambda-managed-instance-walkthrough/walkthrough/"
+    description="Hands-on entry — Prerequisites checklist, then IAM, capacity provider, Lambda, and demo as they publish."
+  >
+    <IconMdiHammerWrench slot="icon" aria-hidden />
+  </LinkCardWithIcon>
+  <LinkCardWithIcon
+    title="LMI fundamentals"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/"
+    description="Concept map — placement, scaling, security, IAM, runtimes, publishing, networking, monitoring, quotas, and decision guide."
+  >
+    <IconMdiBookOpenVariant slot="icon" aria-hidden />
+  </LinkCardWithIcon>
+  <LinkCardWithIcon
+    title="How this site is organised"
+    href="/aws-lambda-managed-instance-walkthrough/overview/#how-this-site-is-organised"
+    description="Jumps to the site map on Introduction — Getting started, fundamentals, Walkthrough, and future sections."
+  >
+    <IconMdiSitemap slot="icon" aria-hidden />
+  </LinkCardWithIcon>
+</CardGrid>

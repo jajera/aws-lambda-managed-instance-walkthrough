@@ -1,0 +1,15 @@
+---
+/**
+ * VPC IPv4 egress for the walkthrough networking lab (examples/waf-loki + modules/vpc).
+ * Theme-aware SVG: use #ffffff / #000000 fills and strokes where you want light/dark remapping.
+ */
+import diagramSvg from '@/assets/walkthrough/networking-vpc-ipv4-traffic.svg?raw';
+---
+
+<div
+  class="theme-aware-diagram not-content"
+  role="img"
+  aria-label="AWS VPC diagram: Internet, internet gateway, three public subnets with a single NAT gateway, three private subnets, and Lambda Managed Instances capacity provider ENIs."
+>
+  <Fragment set:html={diagramSvg} />
+</div>

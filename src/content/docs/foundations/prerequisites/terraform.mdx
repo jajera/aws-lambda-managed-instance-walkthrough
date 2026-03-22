@@ -1,0 +1,111 @@
+---
+title: Terraform
+description: Install Terraform, verify the version, and understand the state and workspace setup used in this walkthrough.
+sidebar:
+  label: Terraform
+---
+
+import { Steps, Aside, Tabs, TabItem, Badge } from '@astrojs/starlight/components';
+import Checklist from '@/components/Checklist.astro';
+import Tooltip from '@/components/Tooltip.astro';
+
+<Checklist
+  id="prereq-terraform"
+  items={[
+    'Terraform >= 1.5 installed',
+    'terraform version returns expected output',
+    'Workspace directory created',
+  ]}
+/>
+
+All infrastructure in this walkthrough - VPC, subnets, <Tooltip term="capacity-provider" />, <Tooltip term="lambda" /> functions, <Tooltip term="iam" /> roles - is created and destroyed with <Tooltip term="terraform" label="Terraform" />. Nothing is created manually in the console (except one-off checks). Using Terraform means:
+
+- Every change is reviewed before it is applied
+- The full environment can be torn down with one command (`terraform destroy`)
+- State tracks what has been created so incremental updates are safe
+
+This site expects the **HashiCorp AWS provider `~> 6.0`** so resources such as `aws_lambda_capacity_provider` and `capacity_provider_config` on `aws_lambda_function` are available. The Terraform code lives in a **separate repository** ([terraform-aws-lambda-managed-instance](https://github.com/jajera/terraform-aws-lambda-managed-instance)). You will clone it in the [Git](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/git/) step.
+
+<Steps>
+
+1. **Install Terraform.** <Badge text="Required" variant="tip" size="small" />
+
+   Use Terraform 1.5 or later. The walkthrough uses features from 1.5+.
+
+   <Tabs syncKey="os">
+     <TabItem label="macOS">
+      ```bash frame="terminal" title="Install via Homebrew (HashiCorp tap)"
+      brew tap hashicorp/tap
+      brew install hashicorp/tap/terraform
+      ```
+
+      To upgrade later:
+
+      ```bash frame="terminal"
+      brew upgrade hashicorp/tap/terraform
+      ```
+     </TabItem>
+     <TabItem label="Debian/Ubuntu">
+      Add the HashiCorp APT repository and install. If needed, install dependencies first: `curl`, `gnupg`, `software-properties-common`.
+
+      ```bash frame="terminal" title="Add HashiCorp repo (Debian/Ubuntu)"
+      sudo apt update
+      sudo apt install -y curl gnupg software-properties-common
+      curl -fsSL https://apt.releases.hashicorp.com/gpg \
+        | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+      echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] \
+        https://apt.releases.hashicorp.com $(lsb_release -cs) main" \
+        | sudo tee /etc/apt/sources.list.d/hashicorp.list
+      sudo apt update
+      sudo apt install -y terraform
+      ```
+     </TabItem>
+     <TabItem label="RHEL / Fedora (dnf)">
+      Add the HashiCorp repository and install. If needed, install `curl` and `gnupg2` first (for example `sudo dnf install -y curl gnupg2`).
+
+      ```bash frame="terminal" title="Add HashiCorp repo (RHEL/Fedora)"
+      sudo dnf config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
+      sudo dnf install -y terraform
+      ```
+     </TabItem>
+   </Tabs>
+
+2. **Verify the installation.**
+
+   ```bash frame="terminal"
+   terraform version
+   ```
+
+   Expected output:
+
+   ```
+   Terraform v1.x.x
+   on linux_amd64
+   ```
+
+   The version must be 1.5 or higher. If you have an older version installed via a different method, uninstall it first.
+
+3. **Create a workspace directory.**
+
+   Create a dedicated directory where you will clone and run Terraform. This keeps the walkthrough files separate from other projects.
+
+   ```bash frame="terminal"
+   mkdir -p ~/workspace
+   cd ~/workspace
+   ```
+
+   You will clone the Terraform repo into this directory in the [Git](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/git/) step.
+
+4. **Understand the state setup.**
+
+   <Aside type="note" title="Local state (default)">
+     This walkthrough uses **local state** - Terraform writes a `terraform.tfstate` file in the working directory. That is fine for a solo walkthrough on your own machine.
+
+     For production use or shared team access, move to **remote state** (for example S3 + DynamoDB backend) so state is stored safely and multiple people or CI can apply changes without conflicts. The [What else](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/what-else/) page has notes on this.
+   </Aside>
+
+</Steps>
+
+## Next step
+
+Continue to [Git](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/git/) to install Git, set your identity, and clone the Terraform repo.

@@ -1,0 +1,63 @@
+---
+title: Monitoring Lambda Managed Instances
+description: CloudWatch metrics for LMI at capacity-provider and execution-environment levels — utilisation, capacity, concurrency, and how to use them for sizing.
+sidebar:
+  label: Monitoring
+---
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+LMI publishes **CloudWatch** metrics so you can watch **fleet utilisation**, **remaining capacity**, and **per-function execution environment** behaviour. Metrics help right-size memory, interpret scaling, and spot concurrency pressure.
+
+For full metric lists, dimensions, and console navigation, use [Monitoring Lambda Managed Instances](https://docs.aws.amazon.com/lambda/latest/dg/lambda-managed-instances-monitoring.html) as the product reference.
+
+## Two metric scopes
+
+| Scope | What it answers | Example dimensions (per AWS) |
+| --- | --- | --- |
+| **Capacity provider** | How hard the **managed fleet** is working and how much headroom remains | **CapacityProviderName**, **InstanceType** |
+| **Execution environment** | How a **specific function version** uses CPU, memory, and concurrency on that fleet | **CapacityProviderName**, **FunctionName**, **Resource** |
+
+For LMI, the **Resource** dimension on execution-environment metrics targets **function versions** — format **`<FunctionName>:<FunctionVersion>`** (not aliases-only semantics in the same way).
+
+## Highlights (what to watch)
+
+**Capacity provider (fleet) level**
+
+| Metric (names per AWS) | Use |
+| --- | --- |
+| **CPUUtilization**, **MemoryUtilization** | Overall pressure across instances behind the provider |
+| **vCPUAvailable**, **MemoryAvailable** | Headroom still allocatable to environments |
+| **vCPUAllocated**, **MemoryAllocated** | What is already committed to execution environments |
+
+**Execution environment (function version) level**
+
+| Metric (names per AWS) | Use |
+| --- | --- |
+| **ExecutionEnvironmentConcurrency** | Observed concurrency (sampled over a window per AWS) |
+| **ExecutionEnvironmentConcurrencyLimit** | Ceiling per environment you configured |
+| **ExecutionEnvironmentCPUUtilization**, **ExecutionEnvironmentMemoryUtilization** | Whether that version is sized correctly |
+
+## Cadence and retention
+
+Per AWS, LMI metrics are published on **5-minute** intervals and retained **15 months** — plan dashboards and alarms around that granularity.
+
+## See also
+
+<CardGrid>
+  <LinkCard
+    title="Elasticity & CPU"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/scaling/"
+    description="How CPU-linked scaling relates to the fleet metrics above."
+  />
+  <LinkCard
+    title="Concurrency & runtimes"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/execution-environment/"
+    description="What execution environments are before you interpret concurrency metrics."
+  />
+  <LinkCard
+    title="Quotas"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/quotas/"
+    description="Service and throughput limits that interact with observed load."
+  />
+</CardGrid>

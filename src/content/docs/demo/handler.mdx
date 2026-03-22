@@ -1,0 +1,132 @@
+---
+title: Node.js 24 WAF Ingest Handler
+description: Walk through the Lambda handler — gzip decompression of WAF log objects, JSON parsing, timestamp conversion, and batched Loki push.
+draft: true
+sidebar:
+  label: Node.js 24 handler
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+<Aside type="note">
+  Terraform code: [terraform-aws-lambda-managed-instance](https://github.com/jajera/terraform-aws-lambda-managed-instance).
+  Handler source: `examples/waf-loki/function-waf/index.mjs`.
+</Aside>
+
+The WAF ingest function runs on **Lambda Managed Instances** using the **Node.js 24** runtime. It receives S3 event notifications, reads the gzip-compressed WAF log object, parses each JSON log line, and pushes the batch to **Loki** via the HTTP push API.
+
+## Handler flow
+
+```text
+S3:ObjectCreated event
+       │
+       ▼
+  GetObject (S3 SDK v3)
+       │
+       ▼
+  Pipe through createGunzip()  (if key ends with .gz)
+       │
+       ▼
+  Split on newline → filter empty lines
+       │
+       ▼
+  Per line:
+    ├── JSON.parse → read obj.timestamp (ms) → convert to ns string
+    └── fallback: Date.now() in ns
+       │
+       ▼
+  POST /loki/api/v1/push
+    body: { streams: [{ stream: { source, bucket }, values: [[ts_ns, line], …] }] }
+```
+
+## Source walkthrough
+
+```javascript title="function-waf/index.mjs"
+import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { createGunzip } from "node:zlib";
+
+const s3 = new S3Client({});
+const LOKI_URL = process.env.LOKI_URL ?? "";
+```
+
+`@aws-sdk/client-s3` is bundled in the Node.js 18+ Lambda runtime — no installation needed. `LOKI_URL` is injected by Terraform as `http://<ec2-private-ip>:3100/loki/api/v1/push`.
+
+```javascript title="function-waf/index.mjs" {3}
+export async function handler(event) {
+  for (const record of event.Records ?? []) {
+    const key = decodeURIComponent(record.s3.object.key.replace(/\+/g, " "));
+    await ingestObject(record.s3.bucket.name, key);
+  }
+}
+```
+
+S3 URL-encodes object keys in event notifications. The `replace(/\+/g, " ")` handles space encoding before `decodeURIComponent`.
+
+```javascript title="function-waf/index.mjs" {2}
+async function ingestObject(bucket, key) {
+  const { Body } = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+  const stream = key.endsWith(".gz") ? Body.pipe(createGunzip()) : Body;
+  // …collect chunks, split on newline
+}
+```
+
+WAF log files delivered by AWS to S3 use `.gz` suffix. The stream is piped through Node's built-in `createGunzip()`.
+
+```javascript title="function-waf/index.mjs" {4}
+const values = lines.map((line) => {
+  let tsNs = String(BigInt(Date.now()) * 1_000_000n);
+  try {
+    const obj = JSON.parse(line);
+    if (typeof obj.timestamp === "number") {
+      tsNs = String(BigInt(obj.timestamp) * 1_000_000n);
+    }
+  } catch { /* non-JSON line — use current time */ }
+  return [tsNs, line];
+});
+```
+
+WAF log timestamps are in **milliseconds**. Loki push API requires **nanoseconds as a string**. `BigInt` math avoids float precision loss: `ms × 1_000_000 = ns`.
+
+```javascript title="function-waf/index.mjs"
+async function pushToLoki(values, labels) {
+  const payload = { streams: [{ stream: labels, values }] };
+  const res = await fetch(LOKI_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    throw new Error(`Loki push failed ${res.status}: ${await res.text()}`);
+  }
+}
+```
+
+`fetch` is built into Node.js 18+. A non-2xx response throws, causing Lambda to mark the invocation as failed — S3 event notifications do not automatically retry, so the raw object remains in S3 for manual replay.
+
+## Loki push API payload
+
+The Loki push endpoint (`/loki/api/v1/push`) expects:
+
+```json title="Loki push payload"
+{
+  "streams": [
+    {
+      "stream": { "source": "waf", "bucket": "your-waf-logs-bucket-name" },
+      "values": [
+        ["1735700000000000000", "{\"timestamp\":1735700000000,\"action\":\"ALLOW\",…}"],
+        ["1735700001000000000", "{\"timestamp\":1735700001000,\"action\":\"BLOCK\",…}"]
+      ]
+    }
+  ]
+}
+```
+
+The `stream` object defines the **label set** used for LogQL queries. The Grafana dashboard queries `{source="waf"}` to show all ingested WAF lines.
+
+## Environment variables
+
+| Variable | Injected by | Value |
+| --- | --- | --- |
+| `LOKI_URL` | Terraform (`environment_variables` on the module) | `http://<ec2-private-ip>:3100/loki/api/v1/push` |
+
+The EC2 private IP is resolved at `terraform apply` time from `aws_instance.obs.private_ip` and written into the Lambda function's environment. No DNS lookup at runtime.

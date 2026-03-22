@@ -1,0 +1,16 @@
+---
+/**
+ * Inlines the LMI "how it works" SVG so page CSS can target it for dark mode.
+ * Same pattern as aws-eks-walkthrough TrafficFlowDiagram.astro — use instead of
+ * <Image> when the SVG must respect data-theme (theme-aware-diagram in splash-overrides.css).
+ */
+import howItWorksSvg from '@/assets/overview/how-it-works-3-steps.svg?raw';
+---
+
+<div
+  class="theme-aware-diagram not-content"
+  role="img"
+  aria-label="How LMI works in three steps: create capacity provider, create and attach Lambda function, then publish function version."
+>
+  <Fragment set:html={howItWorksSvg} />
+</div>

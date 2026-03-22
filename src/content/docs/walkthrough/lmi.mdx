@@ -1,0 +1,130 @@
+---
+title: Lambda Managed Instance stack
+description: Walk through what the lambda_managed_instance module builds — operator role, capacity provider, VPC placement, scaling, and tags — with illustrative snippets and links to fundamentals.
+sidebar:
+  label: LMI stack
+---
+
+import { Aside, Badge, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
+import Checklist from '@/components/Checklist.astro';
+
+<Aside type="note">
+  Terraform code: [terraform-aws-lambda-managed-instance](https://github.com/jajera/terraform-aws-lambda-managed-instance). This lab follows **`examples/waf-loki/main.tf`**, where `module "lambda_managed_instance"` sets **every** argument the [lambda_managed_instance](https://github.com/jajera/terraform-aws-lambda-managed-instance/tree/main/modules/lambda_managed_instance) module accepts so nothing is left implicit.
+</Aside>
+
+<Checklist
+  id="walkthrough-lmi"
+  items={[
+    '[VPC and networking](/aws-lambda-managed-instance-walkthrough/walkthrough/networking/) lab done or stack understood',
+    'Read [Placement & capacity](/aws-lambda-managed-instance-walkthrough/overview/concepts/capacity-providers/) — instance requirements and scaling mode are set here',
+    '`examples/waf-loki` cloned and `terraform init` succeeds',
+  ]}
+/>
+
+## Overview
+
+The walkthrough VPC lab provisions subnets and a security group. This module builds the **capacity provider** side: the operator IAM role, the **`aws_lambda_capacity_provider`** (VPC placement, instance requirements, scaling), and the service-linked role that lets Lambda manage EC2 fleet lifecycle.
+
+The Lambda function itself — execution role, log group, and `aws_lambda_function` — lives in the next lab: [Lambda Managed Function](/aws-lambda-managed-instance-walkthrough/walkthrough/lambda/).
+
+Sections follow the comment groups in **`examples/waf-loki/main.tf`**. Code blocks use **illustrative literals** so you can read the shape without tracing variables.
+
+## Identity
+
+The operator role uses a **`name_prefix`** and is wired into the capacity provider's **`permissions_config`**. The capacity provider has its own unique **`name`**.
+
+```hcl title="Illustrative snippet — identity-related fields"
+# aws_iam_role.operator
+name_prefix = "demo-op-"
+
+# aws_lambda_capacity_provider.this
+name = "demo-capacity"
+
+permissions_config {
+  capacity_provider_operator_role_arn = "arn:aws:iam::111122223333:role/demo-op-abc123"
+}
+```
+
+Further reading: [IAM roles](/aws-lambda-managed-instance-walkthrough/overview/concepts/operator-role/) (execution vs operator).
+
+## Capacity provider and scaling
+
+**`instance_requirements`** constrains CPU architecture and optional allow/deny instance-type lists. **`capacity_provider_scaling_config`** sets mode and vCPU ceiling; in **`Manual`** mode a CPU target policy is added.
+
+```hcl title="Illustrative snippet — instance_requirements"
+  instance_requirements {
+    architectures           = ["x86_64"]
+    allowed_instance_types  = null
+    excluded_instance_types = null
+  }
+```
+
+```hcl title="Illustrative snippet — Auto scaling (no CPU target policy)"
+  capacity_provider_scaling_config {
+    scaling_mode   = "Auto"
+    max_vcpu_count = 16
+  }
+```
+
+Further reading: [Placement & capacity](/aws-lambda-managed-instance-walkthrough/overview/concepts/capacity-providers/), [Elasticity & CPU](/aws-lambda-managed-instance-walkthrough/overview/concepts/scaling/), [Supported instance families](/aws-lambda-managed-instance-walkthrough/overview/concepts/capacity-providers/#supported-instance-families).
+
+## VPC placement
+
+**`vpc_config`** lives on **`aws_lambda_capacity_provider`** (fleet ENIs). This is separate from any VPC config on an `aws_lambda_function`.
+
+```hcl title="Illustrative snippet — vpc_config"
+  vpc_config {
+    subnet_ids         = ["subnet-0a1b2c3d", "subnet-0e5f6a7b"]
+    security_group_ids = ["sg-0123456789abcdef0"]
+  }
+```
+
+[VPC lab](/aws-lambda-managed-instance-walkthrough/walkthrough/networking/) wires **`aws_security_group.lmi`** and private subnets passed in here.
+
+## Tags
+
+**`tags = var.tags`** appears on the operator role and **`aws_lambda_capacity_provider`**.
+
+```hcl title="Illustrative snippet — tags"
+  tags = {
+    Project = "demo"
+    Owner   = "platform"
+  }
+```
+
+## Review the plan
+
+<Steps>
+
+1. **From `examples/waf-loki`,** run **`terraform plan`**. <Badge text="Required" variant="tip" size="small" />
+
+   Expect the service-linked role, the operator role and its attachment, and the capacity provider (VPC config, instance requirements, scaling).
+
+2. **Apply** when the plan matches expectations. Note the **`capacity_provider_arn`** output — the next lab uses it.
+
+</Steps>
+
+## See also
+
+<CardGrid>
+  <LinkCard
+    title="Lambda Managed Function"
+    href="/aws-lambda-managed-instance-walkthrough/walkthrough/lambda/"
+    description="Execution role, log group, and the function wired to this capacity provider."
+  />
+  <LinkCard
+    title="VPC and networking"
+    href="/aws-lambda-managed-instance-walkthrough/walkthrough/networking/"
+    description="Subnets, NAT, and the LMI security group used as inputs here."
+  />
+  <LinkCard
+    title="Decision guide & reference"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/reference/"
+    description="Trade-offs, pattern cards, and neutral implementation outline."
+  />
+  <LinkCard
+    title="Quotas"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/quotas/"
+    description="Account and capacity provider limits that affect scale."
+  />
+</CardGrid>

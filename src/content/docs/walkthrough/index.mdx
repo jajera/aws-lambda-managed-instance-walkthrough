@@ -1,0 +1,20 @@
+---
+title: Walkthrough
+description: Hands-on procedural labs — IAM, capacity provider, Lambda, and demo — after Foundations and LMI fundamentals.
+sidebar:
+  label: Start here
+---
+
+Read **[LMI fundamentals](/aws-lambda-managed-instance-walkthrough/overview/concepts/)** first for placement, scaling, security, runtimes, and publishing. Complete **[Foundations](/aws-lambda-managed-instance-walkthrough/foundations/)** and **[Prerequisites](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/)** (AWS account, CLI, Terraform, Git, and what else) so your environment matches the labs.
+
+This section is **hands-on infrastructure and application work** in order: what to configure in your account and repository step by step. Conceptual topics stay under **LMI fundamentals**.
+
+## Labs
+
+1. **[VPC and networking](/aws-lambda-managed-instance-walkthrough/walkthrough/networking/)** — Clone the Terraform repo (if you have not already), run `terraform init`, `plan`, and `apply` from **examples/waf-loki**, and understand how **`modules/vpc`**, subnets, NAT, routes, and the LMI security group fit together.
+
+2. **[Lambda Managed Instance stack](/aws-lambda-managed-instance-walkthrough/walkthrough/lmi/)** — Walk through **`module "lambda_managed_instance"`** in **`examples/waf-loki/main.tf`**: operator role, capacity provider, VPC placement, instance requirements, and scaling.
+
+3. **[Lambda Managed Function](/aws-lambda-managed-instance-walkthrough/walkthrough/lambda/)** — Walk through **`module "lambda_managed_function"`**: execution role, log group, and the published function wired to the capacity provider via **`capacity_provider_arn`**.
+
+Completing lab 3 ends the **current** hands-on path; that page closes with validation (invoke, logs) and links back to fundamentals. Further labs (IAM-only splits, demo pipeline) will appear in the sidebar when those pages are enabled.

@@ -1,0 +1,15 @@
+---
+/**
+ * WAF → S3 → Lambda invocation flow for examples/waf-loki (lambda.mdx).
+ * Inlined SVG + theme-aware-diagram so fills remap in light/dark (see splash-overrides.css).
+ */
+import diagramSvg from '@/assets/walkthrough/lambda-invocation-triggers.svg?raw';
+---
+
+<div
+  class="theme-aware-diagram not-content"
+  role="img"
+  aria-label="Optional WAFv2 logging delivers log objects to an existing S3 bucket; S3 ObjectCreated notification invokes the published Lambda function; aws_lambda_permission allows S3 to invoke the function using the bucket ARN."
+>
+  <Fragment set:html={diagramSvg} />
+</div>

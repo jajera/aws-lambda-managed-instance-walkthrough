@@ -1,0 +1,32 @@
+---
+description: Professional documentation voice for this repo — no copycat framing or deferential “we only repeat the vendor” tone.
+alwaysApply: true
+---
+
+# Voice and tone
+
+## Required stance
+
+- Write in a **professional**, **direct**, and **confident** voice: plain technical English, no slang, no self-deprecating or dismissive phrasing in user-facing docs.
+- This site is **its own guide**. Explain behaviour **for the reader** first. Vendor documentation is **supporting reference**, not the narrator.
+
+## Do not (copycat / authority-deferral patterns)
+
+Avoid framing that implies we are only parroting or shadowing a vendor doc:
+
+- “The diagram reflects what AWS describes…” / “matches **How it works** in…” / “at a high level this mirrors…”
+- “Similar to \[vendor\]’s outline / structure / sections…”
+- Opening a section by asserting alignment with another doc **before** stating the substance.
+- Stacking multiple sentences in a row that all defer to “AWS says / documents / positions…”
+
+Use **one** concise citation where facts are quota-, region-, or API-sensitive; do not make every paragraph prove loyalty to the source.
+
+## Do instead
+
+- **Lead with the idea** (what happens, what to configure, what to decide), then optionally add **Further reading** or a single inline link to the vendor page.
+- Prefer **imperative or factual** statements: “Provision a capacity provider…”, “Publishing blocks until…”, “LMI does not scale to zero.”
+- When citing vendors, use neutral labels: “Product reference”, “Further reading”, “See also” — not “as AWS explains in their guide” as the main clause.
+
+## Docs in this repository
+
+For `src/content/docs/**`, editors should also follow [.cursor/rules/docs-pattern.mdc](docs-pattern.mdc). If voice rules and layout rules conflict, **voice rules win** for wording; keep structure and components from docs-pattern.

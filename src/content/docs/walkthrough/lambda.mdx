@@ -1,0 +1,267 @@
+---
+title: Lambda Managed Function
+description: Walk through what the lambda_managed_function module builds — execution role, log group, and the published function wired to a capacity provider — with illustrative snippets and links to fundamentals.
+sidebar:
+  label: Lambda function
+---
+
+import { Aside, Badge, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
+import Checklist from '@/components/Checklist.astro';
+import LambdaInvocationTriggersDiagram from '@/components/LambdaInvocationTriggersDiagram.astro';
+
+<Aside type="note">
+  Terraform code: [terraform-aws-lambda-managed-instance](https://github.com/jajera/terraform-aws-lambda-managed-instance). This lab follows **`examples/waf-loki/`**, which wires **`module "lambda_managed_function_waf"`** (Node.js 24) with S3 read, **`LOKI_URL`**, and event sources **outside** the module (S3 notification and **`aws_lambda_permission`**). The sections below use **illustrative** snippets for the module shape; the authoritative input list is [modules/lambda_managed_function variables](https://github.com/jajera/terraform-aws-lambda-managed-instance/blob/main/modules/lambda_managed_function/variables.tf).
+</Aside>
+
+<Checklist
+  id="walkthrough-lambda"
+  items={[
+    '[LMI stack](/aws-lambda-managed-instance-walkthrough/walkthrough/lmi/) applied — `capacity_provider_arn` output is available',
+    'Read [Publishing & activation](/aws-lambda-managed-instance-walkthrough/overview/concepts/version-publishing/) — `capacity_provider_config` and `per_execution_environment_max_concurrency` are immutable after first create',
+    '`examples/waf-loki` cloned and `terraform init` succeeds',
+  ]}
+/>
+
+## Overview
+
+The [LMI stack lab](/aws-lambda-managed-instance-walkthrough/walkthrough/lmi/) provisions the capacity provider. This module builds the **function side**: the execution IAM role, a pre-created CloudWatch log group, and a **published** `aws_lambda_function` with `capacity_provider_config` pointing at the provider ARN.
+
+Code blocks use **illustrative literals** so you can read the shape without tracing variables. Compare with **`examples/waf-loki`** (`lambda_managed_function_waf` in **`main.tf`**) when you apply.
+
+<Aside type="caution">
+  `capacity_provider_config` cannot be added or removed after the function is first created. **`per_execution_environment_max_concurrency`** is also **immutable** after first create. Plan both before the first `terraform apply` that creates the Lambda.
+</Aside>
+
+## Identity
+
+The execution role uses a **`name_prefix`**. **`function_name`** and **`description`** go on **`aws_lambda_function`**. The **`capacity_provider_arn`** input is the output of the `lambda_managed_instance` module.
+
+```hcl title="Illustrative snippet — identity-related fields"
+# aws_iam_role.execution
+name_prefix = "demo-exec-"
+
+# aws_lambda_function.this
+function_name         = "demo-fn"
+description           = "Example Lambda Managed Instance function"
+capacity_provider_arn = "arn:aws:lambda:us-east-1:111122223333:capacity-provider/demo-capacity"
+```
+
+Further reading: [IAM roles](/aws-lambda-managed-instance-walkthrough/overview/concepts/operator-role/) (execution vs operator).
+
+## Deployment artifact
+
+The module does not build the deployment package; it passes through **`filename`** and **`source_code_hash`** on **`aws_lambda_function`**.
+
+```hcl title="Illustrative snippet — deployment package"
+  filename         = ".build/lambda.zip"
+  source_code_hash = "dGhpcy1pcy1ub3QtYS1yZWFsLWhhc2gK"
+```
+
+## Function
+
+LMI minimum memory is **2048 MB**. **`architectures`** must match the capacity provider's **`instance_requirements.architectures`**.
+
+```hcl title="Illustrative snippet — runtime and sizing"
+  handler       = "lambda_function.lambda_handler"
+  runtime       = "python3.14"
+  architectures = ["x86_64"]
+
+  memory_size                    = 2048
+  timeout                        = 30
+  reserved_concurrent_executions = -1
+
+  layers = null
+
+  ephemeral_storage {
+    size = 512
+  }
+```
+
+Further reading: [Concurrency & runtimes](/aws-lambda-managed-instance-walkthrough/overview/concepts/execution-environment/).
+
+## Logging and log group
+
+The module creates **`/aws/lambda/<function_name>`**, wires retention, and points **`logging_config.log_group`** at that group. With **`log_format = "JSON"`**, application and system log levels apply.
+
+```hcl title="Illustrative snippet — CloudWatch log group"
+  name              = "/aws/lambda/demo-fn"
+  retention_in_days = 14
+```
+
+```hcl title="Illustrative snippet — logging_config"
+  logging_config {
+    log_format            = "JSON"
+    log_group             = "/aws/lambda/demo-fn"
+    application_log_level = "INFO"
+    system_log_level      = "WARN"
+  }
+```
+
+The module offers a **`cloudwatch_log_group_prevent_destroy`** flag; when `true`, `lifecycle.prevent_destroy` is set so `terraform destroy` cannot delete the log group. Further reading: [Monitoring](/aws-lambda-managed-instance-walkthrough/overview/concepts/monitoring/).
+
+## Capacity provider link
+
+**`capacity_provider_config`** is set on the function resource and references the capacity provider ARN. **`per_execution_environment_max_concurrency`** is part of this block and is **immutable** after the first create.
+
+```hcl title="Illustrative snippet — function capacity_provider_config"
+  capacity_provider_config {
+    lambda_managed_instances_capacity_provider_config {
+      capacity_provider_arn                     = "arn:aws:lambda:us-east-1:111122223333:capacity-provider/demo-capacity"
+      per_execution_environment_max_concurrency = 10
+    }
+  }
+```
+
+## IAM (execution role extras)
+
+**`AWSLambdaBasicExecutionRole`** is always attached. Extra policies are separate attachments (one per ARN you need).
+
+```hcl title="Illustrative snippet — extra execution policy"
+resource "aws_iam_role_policy_attachment" "execution_extra" {
+  role       = "demo-exec-abc123"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+}
+```
+
+Further reading: [IAM roles](/aws-lambda-managed-instance-walkthrough/overview/concepts/operator-role/).
+
+## Tags
+
+The same map is applied to the execution role and CloudWatch log group. **`aws_lambda_function`** in this module does not set **`tags`**.
+
+```hcl title="Illustrative snippet — tags"
+  tags = {
+    Project = "demo"
+    Owner   = "platform"
+  }
+```
+
+## Invocation and triggers
+
+**`lambda_managed_function`** only declares the function, execution role, and log group. In **`examples/waf-loki`**, **`main.tf`** adds what actually **invokes** the published function:
+
+- **`aws_lambda_permission`** (`principal = s3.amazonaws.com`, **`source_arn`** = the log bucket) allows the bucket to invoke the function.
+- **`aws_s3_bucket_notification`** sends **`s3:ObjectCreated:*`** to the function’s **qualified** ARN (published version). S3 requires **`function:name[:version]`** style ARN, not the API Gateway-style qualified invoke ARN (see the comment on that resource in the example).
+
+<LambdaInvocationTriggersDiagram />
+
+**On-demand**: You can still invoke from the Lambda console or with **`aws lambda invoke`**. The ingest handler expects **S3** event records for real work; a **`{}`** payload is enough for a **smoke** run (no `Records` → no object processing).
+
+**Asynchronous path**: Creating an object in the configured bucket fires **`ObjectCreated`** → Lambda. Scope is controlled by **`waf_logs_prefix`** (empty = entire bucket) and **`waf_logs_object_suffix`** (default **`.gz`**; empty omits the suffix filter — useful for test uploads, risky on shared buckets). Use **`terraform output waf_logs_bucket`** to confirm the bucket name.
+
+**Optional upstream**: If **`web_acl_arn`** is set, **`aws_wafv2_web_acl_logging_configuration`** writes WAF logs into the **same** bucket, so delivery can become WAF → S3 → notification → Lambda. Destroy removes that logging configuration, not the Web ACL itself, if the ACL pre-existed.
+
+## Review the plan
+
+<Steps>
+
+1. **From `examples/waf-loki`,** run **`terraform plan`**. <Badge text="Required" variant="tip" size="small" />
+
+   Expect the execution role and its attachments, the CloudWatch log group, the Lambda function with **`publish = true`** and **`capacity_provider_config`**, plus the example’s **`aws_lambda_permission`** and **`aws_s3_bucket_notification`** for the WAF ingest function.
+
+2. **Compare** your intended **`memory_size`**, **`per_execution_environment_max_concurrency`**, and capacity provider settings with [Publishing & activation](/aws-lambda-managed-instance-walkthrough/overview/concepts/version-publishing/) before **`terraform apply`**.
+
+3. **Apply** when the plan matches expectations. First publish can take several minutes while capacity becomes active.
+
+</Steps>
+
+## After apply
+
+Confirm the **published** function on the capacity provider and its **CloudWatch** log group. You can do that without opening **Grafana** or proving **Loki** ingest — those matter for the full observability demo, not for “Lambda on LMI responds.”
+
+Work from **`examples/waf-loki`** (same directory and AWS credentials **region** as **`terraform apply`**).
+
+### Read Terraform outputs
+
+**`waf_function_name`**, **`waf_function_version`**, **`waf_log_group_name`**, and **`waf_logs_bucket`** (bucket wired to the notification).
+
+```bash frame="terminal" title="Terraform outputs"
+terraform output waf_function_name
+terraform output waf_function_version
+terraform output waf_log_group_name
+terraform output waf_logs_bucket
+```
+
+### Console and logs
+
+In **Lambda**, open the function and confirm a **numbered** published version matches **`terraform output`** (the module sets **`publish = true`**; seeing **`$LATEST`** as well is normal). In **CloudWatch → Log groups**, open **`waf_log_group_name`** and confirm a log stream appears after you invoke (next step).
+
+### CLI smoke check
+
+The AWS CLI **must** have a region for Lambda; without it, commands fail until you specify one. Use the **same** region as **`var.aws_region`** in this workspace’s **`terraform.tfvars`** (the snippet uses **`ap-southeast-2`** — change it if your stack is elsewhere). For a persistent default, run **`aws configure`** or **`aws configure set region <your-region>`**.
+
+```bash frame="terminal" title="get-function and invoke (published version)"
+export AWS_REGION=ap-southeast-2
+
+NAME=$(terraform output -raw waf_function_name)
+VER=$(terraform output -raw waf_function_version)
+aws lambda get-function --region "$AWS_REGION" --function-name "$NAME" --qualifier "$VER" \
+  --query 'Configuration.{State:State,LastUpdateStatus:LastUpdateStatus,Version:Version}' \
+  --output table
+aws lambda invoke --region "$AWS_REGION" --function-name "$NAME" --qualifier "$VER" \
+  --cli-binary-format raw-in-base64-out --payload '{}' /tmp/lmi-smoke.json
+cat /tmp/lmi-smoke.json
+```
+
+An empty **`{}`** payload does not simulate **S3** event records; it is only a quick check that the function runs on **LMI**. When it succeeds, **`get-function`** shows **`State: Active`**, **`LastUpdateStatus: Successful`**, and a **`Version`** that matches your **`terraform output`**. **`invoke`** prints something like the following (your version number may differ):
+
+```text frame="terminal" title="Example CLI output after a successful smoke invoke"
+-------------------------------------------
+|               GetFunction               |
++-------------------+---------+-----------+
+| LastUpdateStatus  |  State  |  Version  |
++-------------------+---------+-----------+
+|  Successful       |  Active |  4        |
++-------------------+---------+-----------+
+
+{
+    "StatusCode": 200,
+    "ExecutedVersion": "4"
+}
+```
+
+**`StatusCode: 200`** means the invocation completed without a Lambda service error; **`ExecutedVersion`** should match the published **`--qualifier`**. The response body is written to **`/tmp/lmi-smoke.json`** (often empty or minimal for this handler with no **`Records`**).
+
+### Optional S3 notification path
+
+To exercise **`aws_s3_bucket_notification`**, create an object in **`waf_logs_bucket`** whose key matches **`waf_logs_prefix`** and **`waf_logs_object_suffix`** (see [Invocation and triggers](#invocation-and-triggers)). Confirm a new invocation and log lines. A full **S3 → Lambda → Loki** check is optional and assumes the observability host and **`LOKI_URL`** are healthy.
+
+### Cleanup
+
+From **`examples/waf-loki`**, run **`terraform destroy`** in the same workspace you used for apply.
+
+The **WAF log bucket** is an **existing** bucket (referenced by **`waf_logs_bucket_name`**); this stack does **not** delete the bucket or its objects. Empty or delete the bucket yourself if you created it only for the lab. If **`web_acl_arn`** was set, destroy removes the **logging configuration** resource, not the Web ACL.
+
+For metrics, filters, and alarms, see **[Monitoring](/aws-lambda-managed-instance-walkthrough/overview/concepts/monitoring/)**; for how publishes relate to capacity, see **[Publishing & activation](/aws-lambda-managed-instance-walkthrough/overview/concepts/version-publishing/)**.
+
+That finishes the **current** lab sequence: **VPC and networking**, **LMI stack**, then **Lambda Managed Function**. Concept pages under **[LMI fundamentals](/aws-lambda-managed-instance-walkthrough/overview/concepts/)** remain the place for placement, scaling, and trade-offs. Further procedural labs will appear in the sidebar when those pages are enabled.
+
+## See also
+
+<CardGrid>
+  <LinkCard
+    title="Walkthrough"
+    href="/aws-lambda-managed-instance-walkthrough/walkthrough/"
+    description="Lab order and how this section fits the rest of the site."
+  />
+  <LinkCard
+    title="LMI stack"
+    href="/aws-lambda-managed-instance-walkthrough/walkthrough/lmi/"
+    description="Capacity provider, operator role, VPC placement, and scaling — must apply first."
+  />
+  <LinkCard
+    title="VPC and networking"
+    href="/aws-lambda-managed-instance-walkthrough/walkthrough/networking/"
+    description="Subnets, NAT, and the LMI security group used by the capacity provider."
+  />
+  <LinkCard
+    title="Decision guide & reference"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/reference/"
+    description="Trade-offs, pattern cards, and neutral implementation outline."
+  />
+  <LinkCard
+    title="Quotas"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/quotas/"
+    description="Account and capacity provider limits that affect scale."
+  />
+</CardGrid>

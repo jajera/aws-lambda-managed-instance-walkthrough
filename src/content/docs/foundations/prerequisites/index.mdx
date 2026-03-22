@@ -1,0 +1,56 @@
+---
+title: Prerequisites
+description: Everything you need before creating any infrastructure — work through each area in order.
+sidebar:
+  label: Prerequisites
+---
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+import Checklist from '@/components/Checklist.astro';
+
+<Checklist
+  id="prerequisites-overview"
+  items={[
+    'AWS account and admin or scoped access configured',
+    'IAM Identity Center enabled (optional; alternative to long-lived IAM user keys)',
+    'AWS CLI installed and configured',
+    'Terraform installed (>= 1.5)',
+    'Git installed, user configured, and Terraform repo cloned',
+    'Region chosen, cost and teardown approach noted',
+  ]}
+/>
+
+These steps match what **[LMI fundamentals](/aws-lambda-managed-instance-walkthrough/overview/concepts/)** and the hands-on **[Walkthrough](/aws-lambda-managed-instance-walkthrough/walkthrough/)** labs assume. Work through them in order; later pages depend on earlier ones. Each page has detailed steps and uses tabs for macOS vs Linux or IAM user vs IAM Identity Center where choices exist.
+
+<CardGrid>
+  <LinkCard
+    title="AWS account"
+    description="Create or use an AWS account, enable MFA, and choose your region."
+    href="/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/aws-account/"
+  />
+  <LinkCard
+    title="IAM Identity Center"
+    description="Enable centralised access and short-lived credentials instead of long-lived keys."
+    href="/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/iam-identity-center/"
+  />
+  <LinkCard
+    title="AWS CLI"
+    description="Install the CLI and configure access — IAM user keys or SSO."
+    href="/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/aws-cli/"
+  />
+  <LinkCard
+    title="Terraform"
+    description="Install Terraform and understand the repo and state approach."
+    href="/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/terraform/"
+  />
+  <LinkCard
+    title="Git"
+    description="Install Git, set your identity, and clone the Terraform repo."
+    href="/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/git/"
+  />
+  <LinkCard
+    title="What else"
+    description="Region, Terraform state, cost warnings, and teardown reminder."
+    href="/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/what-else/"
+  />
+</CardGrid>

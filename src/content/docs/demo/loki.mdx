@@ -1,0 +1,103 @@
+---
+title: Loki on EC2 (Docker Compose)
+description: How Loki runs in this demo — monolithic mode, Docker Compose on a private EC2, EBS-backed storage, and the push path from Lambda.
+draft: true
+sidebar:
+  label: Loki
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside type="note">
+  Terraform code: [terraform-aws-lambda-managed-instance](https://github.com/jajera/terraform-aws-lambda-managed-instance).
+  EC2 bootstrap: `examples/waf-loki/templates/user_data.sh.tftpl` (dashboards: `templates/dashboards/`).
+</Aside>
+
+Loki runs in **monolithic mode** on a single `t3.small` EC2 instance in a private subnet. Docker Compose manages both Loki and Grafana on the same host.
+
+## EC2 bootstrap
+
+Terraform provisions the instance with `user_data` that:
+
+1. Installs Docker (`dnf install -y docker`).
+2. Downloads Docker Compose v2 from GitHub releases.
+3. Writes all config files to `/opt/obs/`.
+4. Runs `docker compose up -d`.
+
+SSM Session Manager is enabled via an IAM instance profile (`AmazonSSMManagedInstanceCore`), so you can connect without an SSH key:
+
+```bash frame="terminal"
+aws ssm start-session --target "$(terraform output -raw obs_instance_id)"
+```
+
+## Loki config (`loki-config.yaml`)
+
+```yaml title="templates/user_data.sh.tftpl (Loki excerpt)"
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+
+common:
+  instance_addr: 127.0.0.1
+  path_prefix: /loki
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks
+      rules_directory: /loki/rules
+  replication_factor: 1
+  ring:
+    kvstore:
+      store: inmemory
+
+schema_config:
+  configs:
+    - from: 2020-10-24
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+```
+
+Chunks and TSDB index write to `/loki` inside the container, which maps to a Docker **named volume** backed by the EC2 **root EBS volume** (30 GB gp3, encrypted).
+
+## Storage durability
+
+| Event | Effect on Loki data |
+| --- | --- |
+| Instance **reboot** or stop/start | Data retained — same EBS volume reattaches |
+| Instance **replacement** (Terraform taint, hardware failure) | Data lost — new root volume |
+| S3 WAF log objects | Always retained in the WAF log bucket; manual re-upload re-drives ingestion |
+
+<Aside type="tip">
+  If you need Loki data to survive instance replacement, configure the S3 storage backend instead (`storage_config.aws` with TSDB shipper). For this demo, EBS is sufficient and keeps the stack simple.
+</Aside>
+
+## Network path: Lambda → Loki
+
+Lambda ENIs are placed in private subnets and carry the `aws_security_group.lmi` security group. The EC2 (`aws_security_group.obs`) allows inbound **TCP 3100** from `aws_security_group.lmi`:
+
+```hcl title="examples/waf-loki/main.tf (excerpt)"
+ingress {
+  from_port       = 3100
+  to_port         = 3100
+  protocol        = "tcp"
+  security_groups = [aws_security_group.lmi.id]
+  description     = "Loki push from Lambda ENIs"
+}
+```
+
+`LOKI_URL` is set on the WAF function to `http://<ec2-private-ip>:3100/loki/api/v1/push`. The IP is resolved at `terraform apply` time; no internal DNS is required.
+
+## Checking Loki status
+
+```bash frame="terminal"
+# Inside SSM session on the EC2
+docker compose -f /opt/obs/docker-compose.yaml ps
+docker compose -f /opt/obs/docker-compose.yaml logs --tail 50 loki
+
+# Loki ready endpoint
+curl http://localhost:3100/ready
+```

@@ -1,0 +1,136 @@
+/* Splash page: hero buttons and card grid — cleaner, aligned layout */
+
+/* Hero action buttons: larger, clearer hierarchy, subtle hover */
+.hero .actions .sl-link-button {
+  font-weight: 600;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.hero .actions .sl-link-button.primary {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.hero .actions .sl-link-button.primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.hero .actions .sl-link-button.secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border-width: 1.5px;
+}
+
+.hero .actions .sl-link-button.secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+/* Card grid (splash only): strict 2x2 alignment, no stagger */
+[data-has-hero] .card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  align-items: stretch;
+}
+
+@media (min-width: 50rem) {
+  [data-has-hero] .card-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  [data-has-hero] .card-grid > * {
+    transform: none;
+  }
+}
+
+/* Card tiles: consistent height and padding */
+[data-has-hero] .card-grid :global(.sl-card) {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem 1.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--sl-color-gray-5);
+}
+
+[data-has-hero] .card-grid :global(.sl-card) :global(h3) {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+[data-has-hero] .card-grid :global(.sl-card) :global(p) {
+  flex: 1;
+  margin-bottom: 0;
+  color: var(--sl-color-gray-2);
+}
+
+/* ===== Aside and code block overrides (clearer than theme default) ===== */
+
+/* Caution aside: clearer amber warning, better contrast in light and dark */
+.starlight-aside--caution {
+  --sl-color-asides-border: oklch(0.75 0.15 75);
+  --sl-color-asides-text-accent: oklch(0.82 0.14 75);
+  background-color: oklch(0.25 0.03 75 / 0.5);
+  border-inline-start-width: 4px;
+}
+
+[data-theme='light'] .starlight-aside--caution {
+  --sl-color-asides-border: oklch(0.55 0.18 75);
+  --sl-color-asides-text-accent: oklch(0.45 0.12 75);
+  background-color: oklch(0.97 0.02 75);
+}
+
+/* Code blocks inside content: slightly softer frame so they don’t clash with asides */
+.sl-markdown-content [data-ec-frame="terminal"] {
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.sl-markdown-content [data-ec-frame="terminal"] [data-ec-frame-bar] {
+  background-color: var(--sl-color-gray-6);
+  color: var(--sl-color-gray-2);
+  border-bottom: 1px solid var(--sl-color-gray-5);
+}
+
+[data-theme='light'] .sl-markdown-content [data-ec-frame="terminal"] [data-ec-frame-bar] {
+  background-color: var(--sl-color-gray-5);
+  color: var(--sl-color-gray-2);
+}
+
+/* Theme-aware diagrams: any inlined SVG in .theme-aware-diagram uses theme colors.
+   Use this wrapper for diagrams that use #fff / #000 so they work in light and dark mode.
+   No per-diagram customization needed. */
+.theme-aware-diagram {
+  max-width: 100%;
+  height: auto;
+}
+
+.theme-aware-diagram svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.theme-aware-diagram svg [fill="#ffffff"] {
+  fill: var(--sl-color-background, #fff);
+}
+
+.theme-aware-diagram svg [fill="#000000"] {
+  fill: var(--sl-color-text, #000);
+}
+
+.theme-aware-diagram svg [stroke="#000000"] {
+  stroke: var(--sl-color-text, #000);
+}
+
+/* Lambda invocation diagram (lambda-invocation-triggers.svg): soften bright box fills on dark theme */
+[data-theme='dark'] .theme-aware-diagram svg [fill='#38b6ff'] {
+  fill: oklch(0.52 0.1 245);
+}
+
+[data-theme='dark'] .theme-aware-diagram svg [fill='#8c4fff'] {
+  fill: oklch(0.48 0.14 300);
+}
