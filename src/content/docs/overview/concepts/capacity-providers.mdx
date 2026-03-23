@@ -1,0 +1,69 @@
+---
+title: Placement, VPC, and dedicated capacity
+description: Where LMI runs in your account — VPC wiring, instance requirements, provider controls, and what AWS still operates for you.
+sidebar:
+  label: Placement & capacity
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import CapacityProviderResponsibilityBoundaryDiagram from '@/components/CapacityProviderResponsibilityBoundaryDiagram.astro';
+
+A **capacity provider** is the placement boundary for LMI. You define **where** compute runs (VPC, subnets, security groups) and the **instance requirements** Lambda can use (for example `x86_64` or `arm64`). A function uses that provider through **`capacity_provider_config`** on `aws_lambda_function`.
+
+<Aside type="caution">
+  `capacity_provider_config` cannot be added or removed after the function is first created. Decide whether the function runs on LMI before you create that function. See [Publishing & activation](/aws-lambda-managed-instance-walkthrough/overview/concepts/version-publishing/).
+</Aside>
+
+## Placement model
+
+| Element | What you decide | Why it matters |
+| --- | --- | --- |
+| **VPC placement** | Subnets and security groups in your account | Defines network reachability and boundaries |
+| **Instance requirements** | Architecture and performance constraints | Lets Lambda pick matching current-generation instances |
+| **Scaling config** | `scaling_mode`, `max_vcpu_count`, and related limits | Caps fleet growth for this provider |
+
+You manage provider configuration; Lambda manages how that configuration is realized as running capacity.
+
+## Supported instance families
+
+| Family | x86_64 (Intel & AMD) | arm64 (Graviton) |
+| --- | --- | --- |
+| **C** (compute optimized) | C5, C6, C7 | C6G, C7G, C8G |
+| **M** (general purpose) | M5, M6, M7 | M6G, M7G, M8G |
+| **R** (memory optimized) | R5, R6, R7 | R6G, R7G, R8G |
+
+- Use **`.large` or larger** sizes within these families.
+- **Default:** Lambda selects a suitable current-generation type from the allowed set for your architecture and function configuration.
+- **Override:** narrow the pool with **allowed** or **excluded** instance types on the capacity provider (only one of those lists applies).
+
+<Aside type="note">
+  **Further reading:** SKU-level availability is **region-specific**. On [AWS Lambda pricing](https://aws.amazon.com/lambda/pricing/), choose your **Region**, open **Lambda Managed Instances**, and use the **Management Fees** section as the enumerated list. For API fields, see [Capacity providers](https://docs.aws.amazon.com/lambda/latest/dg/lambda-managed-instances-capacity-providers.html); for how overrides interact with scaling, see [Scaling — Instance type selection](https://docs.aws.amazon.com/lambda/latest/dg/lambda-managed-instances-scaling.html).
+</Aside>
+
+## Fully managed (what AWS operates)
+
+<CapacityProviderResponsibilityBoundaryDiagram />
+
+With LMI, you do not run the fleet like normal EC2 operations. You configure placement and limits; Lambda runs lifecycle, patching, routing, and managed scaling behavior for the provider fleet.
+
+For quota-sensitive and API-field details, use [Lambda Managed Instances](https://docs.aws.amazon.com/lambda/latest/dg/lambda-managed-instances.html) as the product reference.
+
+## See also
+
+<CardGrid>
+  <LinkCard
+    title="Tenancy & isolation"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/security/"
+    description="Capacity provider as a security boundary; isolation and trust models."
+  />
+  <LinkCard
+    title="IAM roles"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/operator-role/"
+    description="Execution identity for your code versus operator permissions Lambda uses to run the fleet."
+  />
+  <LinkCard
+    title="Publishing & activation"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/version-publishing/"
+    description="When managed instances and execution environments appear after you publish a version."
+  />
+</CardGrid>

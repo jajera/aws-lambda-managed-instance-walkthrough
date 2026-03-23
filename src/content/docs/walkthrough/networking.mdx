@@ -1,0 +1,121 @@
+---
+title: VPC and networking
+description: Deploy the walkthrough VPC stack with Terraform — subnets, NAT, routes, and the security group that capacity provider ENIs use.
+sidebar:
+  label: VPC & networking
+---
+
+import { Steps, Aside, FileTree, Badge, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import Checklist from '@/components/Checklist.astro';
+import Tooltip from '@/components/Tooltip.astro';
+import NetworkingVpcIpv4TrafficDiagram from '@/components/NetworkingVpcIpv4TrafficDiagram.astro';
+
+<Aside type="note">
+  Terraform code: [terraform-aws-lambda-managed-instance](https://github.com/jajera/terraform-aws-lambda-managed-instance). This lab uses **[examples/waf-loki](https://github.com/jajera/terraform-aws-lambda-managed-instance/tree/main/examples/waf-loki)** and the shared **[modules/vpc](https://github.com/jajera/terraform-aws-lambda-managed-instance/tree/main/modules/vpc)** module (the same networking building block described in that repository’s own docs).
+</Aside>
+
+<Checklist
+  id="walkthrough-networking"
+  items={[
+    'Companion repo cloned and examples/waf-loki reachable',
+    'aws_region and availability_zones aligned in tfvars or variables',
+    'terraform init and terraform plan run without errors',
+    'terraform apply completed (or you understand what the plan will create)',
+    'Optional: VPC and subnets visible in the EC2 console',
+  ]}
+/>
+
+## Overview
+
+Lambda Managed Instances run managed <Tooltip term="ec2" /> capacity in **your** <Tooltip term="vpc" />. In this repository, **`modules/vpc`** builds a small, repeatable layout: **public** <Tooltip term="subnet" />s for an <Tooltip term="igw" /> and a <Tooltip term="nat" /> gateway, **private** subnets for workloads, and route tables so private IPv4 egress goes through NAT. The walkthrough example also defines **`aws_security_group.lmi`**: a <Tooltip term="sg" /> attached to the <Tooltip term="capacity-provider" /> so ENIs can reach the Lambda control plane and CloudWatch Logs (egress allowed in the example).
+
+For **why** you might choose public subnets, endpoints, or NAT in production, read [VPC connectivity for Lambda Managed Instances](/aws-lambda-managed-instance-walkthrough/overview/concepts/networking/). For **placement** (subnets and security groups as the provider boundary), see [Placement & capacity](/aws-lambda-managed-instance-walkthrough/overview/concepts/capacity-providers/).
+
+<Aside type="caution">
+  `capacity_provider_config` cannot be added or removed after the function is first created. Plan your function configuration before the first `terraform apply` that creates the Lambda. See [Publishing & activation](/aws-lambda-managed-instance-walkthrough/overview/concepts/version-publishing/).
+</Aside>
+
+## Repository layout
+
+<FileTree>
+- examples/waf-loki/
+  - **main.tf**
+  - **variables.tf**
+  - function/
+  - …
+- modules/vpc/
+  - **main.tf**
+  - **variables.tf**
+  - …
+</FileTree>
+
+## Traffic path
+
+AWS resources and traffic flow for the default layout **`modules/vpc`** provisions (used by **examples/waf-loki**):
+
+<NetworkingVpcIpv4TrafficDiagram />
+
+Private subnets have no path from the internet **inbound** by default; outbound IPv4 uses the NAT gateway in a public subnet. The capacity provider places ENIs in the **private** subnets you pass from this VPC.
+
+<Steps>
+
+1. **Finish prerequisites.** <Badge text="Required" variant="tip" size="small" />
+
+   Complete [Git](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/git/) (clone the Terraform repo), [Terraform](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/terraform/), and [What else](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/what-else/) — especially **one region** and matching **Availability Zones** for every resource.
+
+2. **Open the walkthrough example directory.**
+
+   ```bash frame="terminal"
+   cd terraform-aws-lambda-managed-instance/examples/waf-loki
+   ```
+
+3. **Configure region and networks (optional).**
+
+   ```bash frame="terminal"
+   cp terraform.tfvars.example terraform.tfvars
+   ```
+
+   Edit `terraform.tfvars` or rely on defaults. Keep `aws_region` and `availability_zones` consistent — for example `ap-southeast-2` with `ap-southeast-2a`, `ap-southeast-2b`, and `ap-southeast-2c`. The example defaults to **`10.0.0.0/16`**, with public subnets **`10.0.1.0/24`**, **`10.0.2.0/24`**, **`10.0.3.0/24`** and private subnets **`10.0.101.0/24`**, **`10.0.102.0/24`**, **`10.0.103.0/24`** (one public/private pair per AZ). If you run more than one stack in the same account, choose non-overlapping `vpc_cidr` and subnet lists. Confirm [Lambda Managed Instances](https://docs.aws.amazon.com/lambda/latest/dg/lambda-managed-instances.html) is available in your chosen region.
+
+4. **Install providers and review the plan.**
+
+   ```bash frame="terminal"
+   terraform init
+   terraform plan
+   ```
+
+   In the plan, expect a <Tooltip term="vpc" />, **three public and three private subnets** across three Availability Zones, an internet gateway, **one NAT gateway** (default `single_nat_gateway` in `modules/vpc`), route tables (public `0.0.0.0/0` → IGW; private → NAT), the **LMI security group** (egress-only to `0.0.0.0/0` in the example), plus IAM, CloudWatch log group, capacity provider, and Lambda from `modules/lambda_managed_instance`.
+
+5. **Apply.**
+
+   ```bash frame="terminal"
+   terraform apply
+   ```
+
+   First apply can take several minutes while capacity and the published function version become active.
+
+6. **Sanity-check in the console (optional).**
+
+   In **VPC** and **EC2 → Subnets**, confirm CIDRs and route tables match the plan. After traffic exists, managed instances may show service tags such as `aws:lambda:capacity-provider` — those are applied by AWS, not by your `tags` block in Terraform.
+
+</Steps>
+
+## See also
+
+<CardGrid>
+  <LinkCard
+    title="Networking fundamentals"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/networking/"
+    description="IGW, NAT, and VPC endpoints — choosing a connectivity pattern."
+  />
+  <LinkCard
+    title="Placement & capacity"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/capacity-providers/"
+    description="Subnets and security groups as the capacity provider boundary."
+  />
+  <LinkCard
+    title="Tenancy & isolation"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/security/"
+    description="Trust boundaries and VPC posture for LMI."
+  />
+</CardGrid>

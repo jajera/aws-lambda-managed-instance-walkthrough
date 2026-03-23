@@ -1,0 +1,258 @@
+---
+description: Pattern and conventions for creating and editing walkthrough documentation pages in this repo.
+globs:
+  - "src/content/docs/**/*.mdx"
+  - "src/content/docs/**/*.md"
+alwaysApply: false
+---
+
+# Docs Pattern
+
+**Voice:** Follow **[.cursor/rules/voice-tone.mdc](voice-tone.mdc)** — professional tone; explain for the reader; do not frame pages as copies of vendor documentation.
+
+## File types
+
+- Use `.mdx` for all walkthrough pages (required for component imports).
+- Use `.md` only for simple content with no components.
+- The introduction page (`src/content/docs/index.mdx`) uses `template: splash`.
+
+## Frontmatter template
+
+Every walkthrough page must start with:
+
+```mdx
+---
+title: <Page Title>
+description: <One sentence describing what this page covers.>
+draft: true        # Remove only when the page is ready to publish
+sidebar:
+  label: <Short label shown in the sidebar>
+---
+```
+
+Remove `draft: true` when the page is ready to go live. Draft pages are excluded from production builds (`npm run build`) but visible in dev (`npm run dev`).
+
+## MDX imports
+
+Always import components at the top of the file, after the frontmatter:
+
+```mdx
+import { Steps, Aside, Tabs, TabItem, FileTree, Badge, Card, CardGrid, LinkCard, LinkButton } from '@astrojs/starlight/components';
+import { Image } from 'astro:assets';
+import Checklist from '@/components/Checklist.astro';
+import Tooltip from '@/components/Tooltip.astro';
+```
+
+Only import what you actually use on that page.
+
+## Introduction page — CardGrid is the page footer
+
+For **`src/content/docs/overview/index.mdx`**:
+
+- When the page includes a **`<CardGrid>`** of fundamentals / navigation **`LinkCard`** entries (the **Fundamentals at a glance** block), that grid and any **`LinkCard` immediately following it** as part of the same closing block **must be the last content on the page**.
+- Do **not** place tooling notes, site-map tables, batch/`draft` explanations, or companion-repo paragraphs **after** that grid. Put them **above** **Fundamentals at a glance** (e.g. under a section such as **Using this walkthrough**).
+- Preserve **`id="how-this-site-is-organised"`** on the site-map heading so deep links (e.g. from the splash page) keep working.
+
+## Page structure for walkthrough pages
+
+Follow this order:
+
+1. **External repo Aside** — if the page references Terraform code in the companion module repo
+2. **Checklist** — progress tracker at the top
+3. **Overview** heading — plain text intro with Tooltip terms
+4. **Repository layout** — FileTree showing relevant files
+5. **Steps** — the actual procedure
+
+## External repo reference
+
+When a page uses Terraform infrastructure code from the companion module repo, open with:
+
+```mdx
+<Aside type="note">
+  Terraform code: [terraform-aws-lambda-managed-instance](https://github.com/jajera/terraform-aws-lambda-managed-instance).
+  Resources for this section live under `modules/` or `examples/waf-loki/`.
+</Aside>
+```
+
+## Markdown tables (`.md` and fenced examples in `.mdx`)
+
+Use a **spaced** separator row so tables satisfy common **markdownlint** `MD060` / compact expectations and stay readable:
+
+```markdown
+| Column A | Column B |
+| --- | --- |
+| one | two |
+```
+
+Avoid compact separators like `|---|---|` in raw Markdown.
+
+## capacity_provider_config immutability — critical caution
+
+Whenever a page covers the `capacity_provider_config` block on `aws_lambda_function`, always include:
+
+```mdx
+<Aside type="caution">
+  `capacity_provider_config` cannot be added or removed after the function is first created.
+  Plan your function configuration before running `terraform apply` for the first time.
+</Aside>
+```
+
+## MDX: JSX inside list items (e.g. inside `<Steps>`) — critical
+
+**This is the most common MDX bug in this repo.** Block-level JSX (`<Tabs>`, `<Aside>`, etc.) inside a step **must** be indented so the parser treats it as part of the list item. Wrong indentation causes: `Expected a closing tag for '<Tabs>' before the end of 'listItem'`.
+
+**Rule:** Indent the **entire** JSX block as list-item content. Use these levels consistently:
+
+| Level | Indentation | What |
+| ----- | ----------- | ---- |
+| Step content (code, text, `<Tabs>`) | **3 spaces** | Same as the step's body |
+| Inside `<Tabs>`: `<TabItem>`, `</TabItem>` | **5 spaces** | 3 + 2 |
+| Inside `<TabItem>`: code blocks, etc. | **6 spaces** | 3 + 3 |
+
+## Checklist usage
+
+- `id` must be unique across the entire site. Use the pattern `<section>-<page>` (e.g. `capacity-provider-index`).
+- `items` should mirror the key outcomes of the page, not individual sub-steps.
+- Checklist state is saved in `localStorage` and persists across visits.
+
+## Tooltip usage
+
+- Use `<Tooltip term="vpc" />` for AWS/Lambda abbreviations and jargon.
+- Terms are defined in `src/data/glossary.ts`. Add new terms there — do not inline definitions in page content.
+- Use the `term` key in lowercase (e.g. `term="waf"`, `term="loki"`).
+
+## Code block conventions
+
+| Language tag | When to use |
+| ------------ | ----------- |
+| `hcl` | Terraform resource blocks, variable definitions, outputs |
+| `javascript` or `js` | Node.js 24 Lambda handler code |
+| `json` | Loki push API payload, AWS API responses |
+| `bash` | CLI commands (add `frame="terminal"` for terminal appearance) |
+
+Always add `title="filename.ext"` to code blocks that show file content.
+
+## Expressive Code conventions
+
+- Use `frame="terminal"` for shell commands.
+- Use ` ```diff lang="hcl" ` for before/after Terraform changes.
+- Use `{line}` or `{start-end}` to highlight important lines.
+
+## Sidebar order
+
+**Never number file names.** Sidebar order is controlled entirely in `astro.config.mjs`.
+
+### Draft workflow — critical
+
+Starlight throws a build error if a sidebar `slug` references a page that is `draft: true`. The rule is:
+
+- **Do NOT add a page to the sidebar until it is published (draft removed).**
+- Pre-created draft pages are visible in `npm run dev` but not listed in the sidebar config until ready.
+
+### Publishing a page
+
+1. Write the content in the `.mdx` file (currently `draft: true`).
+2. When ready: remove `draft: true` from the frontmatter.
+3. Uncomment or add the `slug` entry in the correct `items` array in `astro.config.mjs`.
+
+## Internal links and base path
+
+The site is built with `base: '/aws-lambda-managed-instance-walkthrough'` (see `astro.config.mjs`). All internal links **must** include this base path:
+
+- **Correct:** `[IAM](/aws-lambda-managed-instance-walkthrough/iam/)`
+- **Wrong:** `[IAM](/iam/)` (missing base; will break in production)
+
+## Theory-first pattern
+
+For sections with non-trivial background (e.g. Capacity Provider concepts), separate theory from build steps:
+
+- **Concepts pages** (`<section>/concepts/*.mdx` or `concepts/index.mdx`) — theory only; no Terraform steps.
+- **Build page** (`<section>/index.mdx`) — hands-on steps; short intro that links to concepts.
+
+## Theory page conventions
+
+Apply these rules on any page that explains concepts rather than prescribing build steps (e.g. `overview/concepts/`).
+
+### Visual-first order
+
+Every H2 section must lead with an ASCII diagram or table before any prose. Limit prose to one short paragraph per section — if it runs longer, split to a sub-page.
+
+### Diagram workflow (SVG-first, PNG fallback)
+
+1. Render diagrams as fenced ` ```text ` blocks now. Keep them as the canonical source.
+2. Immediately after each ASCII block, add:
+
+   ```mdx
+   <Aside type="note">
+     Diagram pending — SVG (preferred) or PNG version coming. ASCII source above.
+   </Aside>
+   ```
+
+3. When the image is ready:
+   - **SVG that must follow light/dark theme** (diagrams using `#ffffff` / `#000000` like [aws-eks-walkthrough](https://github.com/jajera/aws-eks-walkthrough) traffic-flow): add `src/components/<Name>Diagram.astro` that imports `@/assets/.../<name>.svg?raw` and wraps markup in `<div class="theme-aware-diagram not-content" role="img" aria-label="..."><Fragment set:html={svg} /></div>`. Use `<ThatDiagram />` in MDX. Global remap lives in `src/styles/splash-overrides.css` (same as EKS).
+   - **PNG or non-theme SVG:** use `<Image src={import('...')} alt="..." />` from `astro:assets`.
+   - If SVG is not feasible, use PNG as fallback.
+4. Do NOT delete the ASCII source code block — it serves as the Canva drawing reference until the final image is confirmed correct.
+
+### Diagram sizing standard
+
+Use these sizes in Canva so diagrams align across pages:
+
+- **Wide architecture / flow:** 1600x900 (16:9) — default choice.
+- **Square concept cards / callouts:** 1200x1200 (1:1).
+- **Tall step flow (3-5 stacked boxes):** 1080x1350 (4:5).
+- **Export:** SVG preferred; PNG fallback at 2x target render size.
+- **Stroke and typography baseline:** 2-3 px stroke, 24-32 px headings, 18-22 px body labels.
+
+### LMI abbreviation
+
+- Introduce the full term on first use: **Lambda Managed Instances (LMI)**.
+- Use **LMI** for all subsequent references on the same page and all cross-page references once established in the Introduction.
+
+### Comparison tables
+
+- Max 3 columns: `Dimension` / `Lambda (default)` / `LMI`.
+- Use bold on dimension names for quick scanning.
+- Add a `---` separator only if the table has more than 6 rows.
+
+### Use-case pattern cards
+
+Use `<CardGrid> + <Card> + <Badge>` for use-case/anti-pattern grids:
+
+```mdx
+<CardGrid>
+  <Card title="..." icon="...">
+    <Badge text="Use LMI" variant="success" />
+    Short rationale.
+  </Card>
+  <Card title="..." icon="warning">
+    <Badge text="Avoid LMI" variant="danger" />
+    Short rationale.
+  </Card>
+  <Card title="..." icon="information">
+    <Badge text="Consider carefully" variant="caution" />
+    Short rationale.
+  </Card>
+</CardGrid>
+```
+
+Badge variants: `"success"` = Use, `"danger"` = Avoid, `"caution"` = Consider.
+
+### Terraform snippets on theory pages
+
+- Skeleton only — no full module. Show key attributes for understanding, not for copy-paste deployment.
+- Highlight the most important lines with `{N}` or `{start-end}`.
+- Add a `<LinkCard>` at the bottom linking to the companion Terraform module for the full production version.
+
+## Default AWS region
+
+Always use `ap-southeast-2` (AWS Asia Pacific — New Zealand) as the example region in all docs, code blocks, config snippets, and CLI commands.
+
+```bash frame="terminal"
+aws configure set region ap-southeast-2
+export AWS_REGION=ap-southeast-2
+```
+
+---
+
+_Update this rule when a new convention is adopted._

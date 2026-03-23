@@ -1,0 +1,71 @@
+---
+title: Lambda Managed Instances quotas
+description: High-level LMI quotas — capacity provider API rates, account resource limits, and event source mapping throughput caps versus default Lambda.
+sidebar:
+  label: Quotas
+---
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+LMI carries **separate quotas** from **default Lambda**. Some values are **fixed**; others can be **raised** through Service Quotas. Treat this page as orientation — numbers change with AWS releases.
+
+For authoritative tables and increase procedures, use [Lambda Managed Instances quotas](https://docs.aws.amazon.com/lambda/latest/dg/lambda-managed-instances-quotas.html) as the product reference.
+
+## Capacity provider API throttles
+
+These limits apply **across all capacity-provider control-plane calls** in aggregate (create, update, describe, delete, etc.).
+
+| Limit                       | Value (per AWS)            | Adjustable |
+| --------------------------- | -------------------------- | ---------- |
+| Combined **read** API rate  | **15** requests per second | No         |
+| Combined **write** API rate | **1** request per second   | No         |
+
+Plan automation (Terraform applies, CI) so you do not burst into throttling.
+
+## Account resource quotas
+
+| Resource                                    | Quota (per AWS) | Adjustable             |
+| ------------------------------------------- | --------------- | ---------------------- |
+| **Capacity providers** per account          | **1,000**       | Yes (where AWS allows) |
+| **Function versions** per capacity provider | **100**         | No                     |
+
+The per-provider version cap shapes how many published versions you can attach to a single pool of capacity.
+
+## Event source mapping throughput
+
+LMI supports event sources including **SQS**, **DynamoDB Streams**, **Kinesis**, **MSK**, and **self-managed Kafka**; throughput and mapping counts have **LMI-specific** caps.
+
+| Area                              | Example quota (per AWS) | Adjustable |
+| --------------------------------- | ----------------------- | ---------- |
+| Standard **SQS** ESM throughput   | **5 MB/s**              | No         |
+| Standard **Kafka** ESM throughput | **1 MB/s**              | No         |
+| Standard **Kafka** ESM **count**  | **100** mappings        | No         |
+| **Kinesis** ESM throughput        | **25 MB/s**             | Yes        |
+| **DynamoDB** ESM throughput       | **10 MB/s**             | Yes        |
+| **Async invoke** throughput       | **5 MB/s**              | Yes        |
+
+Use the product page for the full matrix and any new rows.
+
+## Requesting increases
+
+Where AWS marks a quota **increaseable**, use the **Service Quotas** console for **AWS Lambda** and open a **quota increase** request with justification.
+
+## See also
+
+<CardGrid>
+  <LinkCard
+    title="Elasticity & CPU"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/scaling/"
+    description="How fleet behaviour interacts with capacity and throttles."
+  />
+  <LinkCard
+    title="Networking"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/networking/"
+    description="VPC connectivity planning alongside operational limits."
+  />
+  <LinkCard
+    title="Decision guide & reference"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/reference/"
+    description="Broader constraints, patterns, and comparison tables."
+  />
+</CardGrid>

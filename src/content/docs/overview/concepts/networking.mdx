@@ -1,0 +1,50 @@
+---
+title: VPC connectivity for Lambda Managed Instances
+description: High-level connectivity patterns for LMI in your VPC — outbound access to AWS APIs, logs, and X-Ray; public subnet, VPC endpoints, and private subnet with NAT.
+sidebar:
+  label: Networking
+---
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+Functions on LMI run in **your VPC**. You still need a deliberate path for **outbound** access: other AWS services (for example S3, DynamoDB), **CloudWatch Logs**, and **X-Ray** telemetry. Without it, those calls fail even when IAM allows them.
+
+For step-by-step console flows and IPv4/IPv6 variants, use [Networking for Lambda Managed Instances](https://docs.aws.amazon.com/lambda/latest/dg/lambda-managed-instances-networking.html) as the product reference.
+
+## Connectivity pattern
+
+| Pattern                              | Idea                                                                                                 | Typical trade-off                                                          |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| **Public subnet + internet gateway** | Instances reach the internet directly (IPv4 and/or IPv6; egress-only IPv6 if you want outbound-only) | Simple and low cost; mind **inbound** exposure if anything is truly public |
+| **VPC endpoints**                    | Private attachment to supported AWS services; traffic stays on the AWS network                       | Strong isolation; **per-endpoint** and **per-AZ** cost; plan HA across AZs |
+| **Private subnet + NAT gateway**     | Private workloads; outbound IPv4 via NAT in a public subnet                                          | Common enterprise shape; NAT **hourly and data** charges; IPv4-oriented    |
+
+## Choosing
+
+| If you prioritise…                            | Lean toward…                                                                                   |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Speed and cost for experiments                | Public subnet + IGW (with tight security groups)                                               |
+| Production isolation from the public internet | VPC endpoints for AWS APIs you use, and/or private subnets + NAT for general egress            |
+| No inbound from the internet                  | Private + NAT, or public subnet with controls; IPv6 egress-only IGW if IPv6 fits your services |
+
+Subnet choice, route tables, security groups, and endpoint policies are part of **capacity provider** placement — see [Placement & capacity](/aws-lambda-managed-instance-walkthrough/overview/concepts/capacity-providers/).
+
+## See also
+
+<CardGrid>
+  <LinkCard
+    title="Placement & capacity"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/capacity-providers/"
+    description="Subnets, security groups, and provider boundaries where networking attaches."
+  />
+  <LinkCard
+    title="Tenancy & isolation"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/security/"
+    description="Trust boundaries and VPC posture for dedicated LMI capacity."
+  />
+  <LinkCard
+    title="Decision guide & reference"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/reference/"
+    description="Patterns, constraints, and deeper comparison material."
+  />
+</CardGrid>

@@ -1,0 +1,94 @@
+---
+description: How to use the cursor-ide-browser MCP to live-preview the Astro dev server for this documentation site.
+globs: []
+alwaysApply: false
+---
+
+# Browser Preview — cursor-ide-browser MCP
+
+Use the `cursor-ide-browser` MCP tools to inspect rendered output in the running Astro dev server without leaving the editor.
+
+## Start the dev server
+
+```bash frame="terminal"
+npm run dev
+```
+
+The server starts at `http://localhost:4321`. Because the site is configured with `base: '/aws-lambda-managed-instance-walkthrough'`, the correct preview URL is:
+
+```plaintext
+http://localhost:4321/aws-lambda-managed-instance-walkthrough/
+```
+
+Always include the base path — navigating to `http://localhost:4321/` alone returns a 404.
+
+## MCP workflow
+
+1. **List open tabs** — before any navigation, check what is already open:
+
+   ```plaintext
+   browser_tabs { action: "list" }
+   ```
+
+2. **Navigate to a page** — supply the full URL including base path:
+
+   ```plaintext
+   browser_navigate { url: "http://localhost:4321/aws-lambda-managed-instance-walkthrough/overview/" }
+   ```
+
+3. **Lock the browser** — after navigating, lock before any interactions:
+
+   ```plaintext
+   browser_lock {}
+   ```
+
+4. **Snapshot the page** — capture the current DOM structure and element refs:
+
+   ```plaintext
+   browser_snapshot {}
+   ```
+
+   Use the snapshot to verify headings, component rendering, sidebar entries, and link targets.
+
+5. **Take a screenshot** — for visual review (layout, colours, spacing):
+
+   ```plaintext
+   browser_take_screenshot {}
+   ```
+
+6. **Unlock** — when all browser operations for this turn are complete:
+
+   ```plaintext
+   browser_unlock {}
+   ```
+
+## Common preview URLs
+
+| Page | URL |
+| --- | --- |
+| Splash (home) | `http://localhost:4321/aws-lambda-managed-instance-walkthrough/` |
+| Introduction | `http://localhost:4321/aws-lambda-managed-instance-walkthrough/overview/` |
+| Foundations (overview) | `http://localhost:4321/aws-lambda-managed-instance-walkthrough/foundations/` |
+| Prerequisites | `http://localhost:4321/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/` |
+| LMI fundamentals (hub / concept map) | `http://localhost:4321/aws-lambda-managed-instance-walkthrough/overview/concepts/` |
+| Example topic | `http://localhost:4321/aws-lambda-managed-instance-walkthrough/overview/concepts/security/` |
+
+## Wait strategy
+
+When checking for a page after a content change, prefer short incremental waits:
+
+1. Save the file.
+2. `browser_navigate` to the page.
+3. Wait 1–2 s, then `browser_snapshot`.
+4. If the content is not yet updated, wait 1–2 s more and snapshot again.
+
+Do not use a single long wait — Astro HMR is fast and the page is usually ready within 2–3 s.
+
+## Notes
+
+- Draft pages (`draft: true` in frontmatter) are **not served** in `npm run build` output but **are visible** in `npm run dev`. Use the dev server to review draft content.
+- If the dev server is not running, start it before calling any browser MCP tool.
+
+---
+
+_Update this rule if the base path, port, or MCP tool names change._

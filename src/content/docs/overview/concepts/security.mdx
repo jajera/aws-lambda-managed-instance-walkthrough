@@ -1,0 +1,61 @@
+---
+title: Tenancy, isolation, and trust boundaries
+description: How default Lambda and LMI differ in tenancy — Shared Lambda infrastructure, Firecracker, Nitro, containers, and the capacity provider as a security boundary.
+sidebar:
+  label: Tenancy & isolation
+---
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+import Tooltip from '@/components/Tooltip.astro';
+
+## Default Lambda vs LMI tenancy
+
+| Dimension | Lambda (default) | LMI |
+| --- | --- | --- |
+| **Fleet tenancy** | Shared Lambda infrastructure (multi-tenant) | Dedicated managed EC2 capacity in your account |
+| **Isolation substrate** | <Tooltip term="firecracker" label="Firecracker" />-based isolation on shared fleet | Nitro-backed EC2 hosts with containerized execution |
+| **Network boundary** | Managed by Lambda service boundary | Defined by your VPC, subnets, and security groups |
+| **Security boundary focus** | Execution environment on shared service fleet | Capacity provider boundary in your account |
+
+Default Lambda and LMI are both managed Lambda experiences, but the trust boundary moves when you adopt LMI: you configure network and placement boundaries inside your account, while Lambda still operates the fleet behavior.
+
+## Capacity provider boundary
+
+| Boundary element | What it controls |
+| --- | --- |
+| **Subnets** | Where managed instances are placed and which route domains they use |
+| **Security groups** | Allowed inbound and outbound traffic paths for managed capacity |
+| **Instance requirements** | Hardware/architecture constraints for selected EC2 capacity |
+| **Scaling limits** | Upper bounds for provider fleet growth |
+
+The capacity provider is the practical security boundary for LMI workloads: placement and network intent are yours; instance lifecycle and routing behavior are Lambda-operated.
+
+## Operational identity and limits
+
+| Signal | Meaning |
+| --- | --- |
+| **EC2 tags (for example `aws:lambda:capacity-provider`)** | Instance belongs to Lambda-managed provider capacity |
+| **`DescribeInstances` operator metadata** | Indicates Lambda is the operating service for that capacity |
+| **Administrative control model** | Managed instances are not general-purpose EC2 you manage directly |
+
+You can identify managed instances through EC2 metadata, but you should not treat them like normal EC2 admin targets. For quota-sensitive behavior and current API semantics, use [Lambda Managed Instances](https://docs.aws.amazon.com/lambda/latest/dg/lambda-managed-instances.html) as the product reference.
+
+## See also
+
+<CardGrid>
+  <LinkCard
+    title="IAM roles"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/operator-role/"
+    description="Execution-role permissions versus Lambda operator permissions for managed EC2."
+  />
+  <LinkCard
+    title="Placement & capacity"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/capacity-providers/"
+    description="How VPC placement, instance requirements, and scaling limits define provider boundaries."
+  />
+  <LinkCard
+    title="Decision guide & reference"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/reference/#known-limitations"
+    description="Known limitations and guardrails when operating with Lambda Managed Instances."
+  />
+</CardGrid>

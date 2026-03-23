@@ -1,0 +1,86 @@
+---
+title: AWS Account
+description: Create or use an AWS account, secure the root user, and configure day-to-day access before anything else.
+sidebar:
+  label: AWS Account
+---
+
+import { Steps, Aside, Badge } from '@astrojs/starlight/components';
+import Checklist from '@/components/Checklist.astro';
+import Tooltip from '@/components/Tooltip.astro';
+
+<Checklist
+  id="prereq-aws-account"
+  items={[
+    'AWS account created or confirmed available',
+    'MFA enabled on the root user',
+    'IAM user or IAM Identity Center access created for day-to-day use',
+    'Billing alerts enabled and default region chosen',
+  ]}
+/>
+
+This walkthrough creates a <Tooltip term="vpc" />, <Tooltip term="capacity-provider" />, <Tooltip term="lambda" /> functions, and related <Tooltip term="iam" /> resources. You need an <Tooltip term="aws" /> account with permissions to provision all of these. Root access is only needed for initial setup — you'll create a dedicated user (or use IAM Identity Center) for all day-to-day work.
+
+<Steps>
+
+1. **Create or sign in to an AWS account.** <Badge text="Required" variant="tip" size="small" />
+
+   If you don't have an account yet, sign up at [aws.amazon.com](https://aws.amazon.com). Account creation is free — you only pay for the resources you create.
+
+   If you already have an account, sign in as the root user (or an admin) to complete the steps on this page.
+
+2. **Enable MFA on the root user.** <Badge text="Recommended" variant="note" size="small" />
+
+   The root user has unrestricted access to everything in the account. Protect it before doing anything else.
+
+   In the AWS Console:
+   - Click your account name (top right) → **Security credentials**
+   - Under **Multi-factor authentication (MFA)**, choose **Assign MFA device**
+   - Choose **Authenticator app** (e.g. Google Authenticator, 1Password, Authy) or a hardware key
+   - Follow the prompts to scan the QR code and enter two consecutive OTP codes to confirm
+
+   After MFA is set up, sign out and sign back in to verify it works.
+
+3. **Create a dedicated IAM user or use IAM Identity Center for day-to-day work.** <Badge text="Required" variant="tip" size="small" />
+
+   Avoid running Terraform or the AWS CLI as the root user. Create a dedicated identity instead:
+
+   <Aside type="tip">
+     If you prefer **short-lived credentials** and centralised users, set up **IAM Identity Center**
+     and skip creating long-lived IAM user access keys. See the [IAM Identity
+     Center](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/iam-identity-center/)
+     page.
+   </Aside>
+
+   **IAM user path (simpler, access keys):**
+   - In the Console: IAM → Users → **Create user**
+   - Set a user name (e.g. `lmi-admin`)
+   - Attach a policy — for the walkthrough use **AdministratorAccess** (or scope it to VPC, Lambda, IAM, EC2, S3, and related services you plan to use)
+   - Under **Security credentials**: Create access key → choose **CLI** use case → note the Access Key ID and Secret Access Key
+
+   You will enter these into `aws configure` in the [AWS CLI](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/aws-cli/) step.
+
+4. **Enable billing alerts.** <Badge text="Recommended" variant="note" size="small" />
+
+   NAT gateways, EC2 capacity for <Tooltip term="managed-instances" />, and other resources incur cost. Set up a billing alert so you're notified if spend exceeds a threshold.
+
+   In the Console:
+   - Billing and Cost Management → **Budgets** → Create a budget
+   - Choose **Cost budget**, set a monthly threshold (e.g. $50 USD), and add an email alert
+
+5. **Choose and note your AWS region.** <Badge text="Required" variant="tip" size="small" />
+
+   Pick one region for the entire walkthrough. This walkthrough uses `ap-southeast-2` (AWS Asia Pacific — New Zealand). All CLI commands and Terraform will use this region as the default.
+
+   Note it down — you'll enter it during `aws configure` and in your Terraform variables.
+
+   <Aside type="note">
+     Not all services or EC2 instance types are available in every region. If you hit an "instance
+     type not supported" error, try a different instance type within the same region.
+   </Aside>
+
+</Steps>
+
+## Next step
+
+Continue to [IAM Identity Center](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/iam-identity-center/) to set up centralised access and short-lived credentials, or skip ahead to [AWS CLI](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/aws-cli/) if you are using an IAM user with access keys only.

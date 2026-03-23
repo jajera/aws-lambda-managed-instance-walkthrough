@@ -1,0 +1,107 @@
+---
+title: Introduction
+description: Orientation to Lambda Managed Instances — definition, EC2 rationale, three-step flow, how to use this walkthrough, then fundamentals via cards.
+sidebar:
+  label: Introduction
+---
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+import Tooltip from '@/components/Tooltip.astro';
+import HowItWorks3StepsDiagram from '@/components/HowItWorks3StepsDiagram.astro';
+
+## What is Lambda Managed Instances?
+
+**Lambda Managed Instances (LMI)** runs your function on dedicated <Tooltip term="ec2" /> capacity in your own <Tooltip term="vpc" /> instead of **Shared Lambda infrastructure** (the **multi-tenant** <Tooltip term="lambda" label="Lambda" /> fleet). You still use the Lambda programming model; compute is **EC2 in your account**, wired through a **capacity provider**. Isolation and tenancy differ from default Lambda — see **[Tenancy & isolation](/aws-lambda-managed-instance-walkthrough/overview/concepts/security/)**.
+
+## Why EC2 as the compute layer?
+
+| Benefit         | What it means                                                                      |
+| --------------- | ---------------------------------------------------------------------------------- |
+| **Flexibility** | Current-gen CPUs, Graviton, network-optimised options — matched to workload        |
+| **Control**     | Your VPC, subnets, security groups — not another customer’s fleet                  |
+| **Performance** | Configurable memory / vCPU ratios and bandwidth                                    |
+| **Cost levers** | EC2 Savings Plans and RIs apply to underlying compute (management fee is separate) |
+
+## How it works — 3 steps
+
+<HowItWorks3StepsDiagram />
+
+The figure above shows the **operational sequence** for LMI:
+
+1. **Provision placement** — define a **capacity provider** (VPC, subnets, security groups, instance requirements, scaling limits).
+2. **Wire the function** — attach **`capacity_provider_config`** on the Lambda to that provider.
+3. **Publish** — a new **version** remains inactive until **managed instances** and **execution environments** are ready; it then becomes **ACTIVE**. Another function on the **same** provider may consume **existing** spare capacity instead of adding instances.
+
+**Fully managed fleet:** you configure VPC, provider, and function; Lambda operates **managed instances** (lifecycle, patching, routing, and fleet scaling policy on that surface are not yours to run like normal EC2).
+
+## Using this walkthrough
+
+<h3 id="how-this-site-is-organised">How this site is organised</h3>
+
+Content is released in batches. The sidebar lists **published** pages only (`draft` pages are omitted from production builds).
+
+| Area                                                 | Role                                                               |
+| ---------------------------------------------------- | ------------------------------------------------------------------ |
+| **Getting started**                                  | This page — theory orientation, no procedural steps                |
+| **LMI fundamentals**                                 | Short articles: placement through publishing, networking, monitoring, quotas |
+| **Decision guide & reference**                       | Economics, integrations, constraints, patterns, Terraform sketches |
+| **Walkthrough**                                      | **[Overview](/aws-lambda-managed-instance-walkthrough/walkthrough/)** — hands-on entry; **Prerequisites** and future IAM / build / demo pages |
+| **Demo** (under Walkthrough when enabled)            | End-to-end example when that batch publishes                       |
+
+## Fundamentals at a glance
+
+The following articles each cover **one** concern—architecture choices, limits, and behaviour you need before you build. Read in any order. For **quotas, API fields, and region-specific** behaviour, use [Lambda Managed Instances](https://docs.aws.amazon.com/lambda/latest/dg/lambda-managed-instances.html) as the product reference.
+
+<CardGrid>
+  <LinkCard
+    title="Placement & capacity"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/capacity-providers/"
+    description="Where workloads run: VPC wiring, instance requirements, provider-level controls, and what remains fully managed."
+  />
+  <LinkCard
+    title="Elasticity & CPU"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/scaling/"
+    description="How fleet size tracks CPU load; separating managed instances from execution environments."
+  />
+  <LinkCard
+    title="Tenancy & isolation"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/security/"
+    description="Shared Lambda infrastructure versus dedicated Nitro capacity; trust boundaries and isolation models."
+  />
+  <LinkCard
+    title="IAM roles"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/operator-role/"
+    description="Function execution trust versus the managed-EC2 operator trust Lambda uses to run your fleet."
+  />
+  <LinkCard
+    title="Concurrency & runtimes"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/execution-environment/"
+    description="Single-invoke versus multi-invoke sandboxes, runtime constraints, and IO-bound workload fit."
+  />
+  <LinkCard
+    title="Publishing & activation"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/version-publishing/"
+    description="What “publish” triggers: managed instances, execution environments, ACTIVE versions, and capacity reuse."
+  />
+  <LinkCard
+    title="Networking"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/networking/"
+    description="VPC connectivity patterns for outbound AWS access, logs, and tracing."
+  />
+  <LinkCard
+    title="Monitoring"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/monitoring/"
+    description="CloudWatch metrics for fleet capacity and per-function execution environments."
+  />
+  <LinkCard
+    title="Quotas"
+    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/quotas/"
+    description="LMI-specific API, resource, and event source mapping limits."
+  />
+</CardGrid>
+
+<LinkCard
+  title="Decision guide & reference"
+  href="/aws-lambda-managed-instance-walkthrough/overview/concepts/reference/"
+  description="Trade-offs versus default Lambda, economics, integrations, guardrails, pattern cards, and neutral Terraform sketches."
+/>

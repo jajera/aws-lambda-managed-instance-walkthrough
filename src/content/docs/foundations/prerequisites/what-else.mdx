@@ -1,0 +1,121 @@
+---
+title: What Else to Have in Mind
+description: Region, Terraform state strategy, cost expectations, and teardown reminder before you start creating infrastructure.
+sidebar:
+  label: What Else
+---
+
+import { Aside, Badge } from '@astrojs/starlight/components';
+import Checklist from '@/components/Checklist.astro';
+import Tooltip from '@/components/Tooltip.astro';
+
+<Checklist
+  id="prereq-what-else"
+  items={[
+    'Default AWS region confirmed and set in CLI and Terraform',
+    'Terraform state strategy understood (local for this walkthrough)',
+    'Cost expectations noted and billing alert configured',
+    'Teardown approach understood (terraform destroy)',
+  ]}
+/>
+
+Before creating any infrastructure, take five minutes to confirm a few things that affect every step that follows. A wrong region or forgotten teardown can cause confusing errors or unexpected charges.
+
+## Region
+
+Use **one AWS region** for the entire walkthrough. VPC, subnets, <Tooltip term="capacity-provider" />, <Tooltip term="lambda" /> functions, and IAM roles should stay consistent with that region. Mixing regions causes routing issues and authentication failures.
+
+**How to set the default region:**
+
+For IAM user credentials (`aws configure`):
+
+```bash frame="terminal"
+aws configure set region ap-southeast-2
+```
+
+For SSO (set it in your profile config, e.g. `~/.aws/config`):
+
+```ini title="~/.aws/config"
+[profile lmi-walkthrough]
+sso_start_url = https://d-xxxxxxxxxx.awsapps.com/start
+sso_region = ap-southeast-2
+sso_account_id = 123456789012
+sso_role_name = AdministratorAccess
+region = ap-southeast-2
+output = json
+```
+
+Terraform reads the region from the AWS provider config or from the `AWS_REGION` environment variable:
+
+```bash frame="terminal"
+export AWS_REGION=ap-southeast-2
+```
+
+Or set it in `terraform.tfvars` in the Terraform repo (the repo's README explains how).
+
+**This walkthrough uses:** `ap-southeast-2` (AWS Asia Pacific — New Zealand).
+
+<Aside type="note">
+  Not all EC2 instance types are available in every region. If you hit an "instance type not
+  supported" error, try a different instance type within `ap-southeast-2`.
+</Aside>
+
+## Terraform state
+
+This walkthrough uses **local state** — Terraform writes `terraform.tfstate` to the directory where you run commands. This is the simplest setup and works fine for a solo walkthrough.
+
+**Why local state is fine here:**
+
+- You're the only person running Terraform
+- The state file lives in the cloned repo directory on your machine
+- No S3 bucket or DynamoDB table to set up
+
+**When to move to remote state (later):**
+
+If you continue using this setup for real workloads, or if multiple people or CI need to run Terraform, switch to a remote backend. A common pattern for AWS:
+
+```hcl title="backend.tf (not needed now)"
+terraform {
+  backend "s3" {
+    bucket         = "my-terraform-state"
+    key            = "lmi/terraform.tfstate"
+    region         = "ap-southeast-2"
+    dynamodb_table = "terraform-state-lock"
+  }
+}
+```
+
+This is **not required** for the walkthrough. You can adopt remote state when you productionise.
+
+## Cost
+
+The resources created in this walkthrough are **not free tier** in general. Approximate cost while running depends on how much EC2 capacity you provision for <Tooltip term="managed-instances" />, whether you use NAT gateways, and how often Lambda runs. Order-of-magnitude examples:
+
+| Resource                     | Approximate cost                                 |
+| ---------------------------- | ------------------------------------------------ |
+| NAT Gateway                  | ~$0.045 / hour + data transfer                   |
+| EC2 (capacity provider pool) | Depends on instance type and count               |
+| Lambda                       | Usage-based (often small relative to NAT/EC2)    |
+| **Total**                    | **Highly variable** — use budgets and dashboards |
+
+<Aside type="caution" title="Cost and cleanup">
+  Always run `terraform destroy` when you finish a session. NAT gateways, EC2 instances, and other billable resources continue to charge while they exist — even if you're not invoking Lambda. Check the [AWS Billing console](https://console.aws.amazon.com/billing/) if unsure what's running.
+
+```bash frame="terminal" title="Tear down (run from the Terraform root or module path in your clone)"
+cd ~/workspace/terraform-aws-lambda-managed-instance
+terraform destroy
+```
+
+Use the directory and workspace layout described in the Terraform repo's README if it differs.
+
+</Aside>
+
+To avoid surprise charges:
+
+- Set a billing alert (covered in the [AWS Account](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/aws-account/) step)
+- Run `terraform destroy` at the end of each session
+- Check the EC2 and Lambda dashboards in the Console after destroying to confirm nothing is left running
+
+## You're ready
+
+Prerequisites are complete. Continue with the **[Walkthrough](/aws-lambda-managed-instance-walkthrough/walkthrough/)** batches as they publish, or follow the Terraform repo README for the next apply steps.
