@@ -6,11 +6,14 @@ sidebar:
   label: Grafana
 ---
 
-import { Aside } from '@astrojs/starlight/components';
+import { Aside } from "@astrojs/starlight/components";
 
 <Aside type="note">
-  Terraform code: [terraform-aws-lambda-managed-instance](https://github.com/jajera/terraform-aws-lambda-managed-instance).
-  On first boot, EC2 `user_data` writes datasource YAML and dashboard JSON under `/opt/obs/grafana/`. Terraform renders `templates/user_data.sh.tftpl` and injects `templates/dashboards/*.json` as base64 so the instance files match the repo.
+  Terraform code:
+  [terraform-aws-lambda-managed-instance](https://github.com/jajera/terraform-aws-lambda-managed-instance).
+  On first boot, EC2 `user_data` writes datasource YAML and dashboard JSON under
+  `/opt/obs/grafana/`. Terraform renders `templates/user_data.sh.tftpl` and injects
+  `templates/dashboards/*.json` as base64 so the instance files match the repo.
 </Aside>
 
 Grafana runs alongside Loki on the same EC2 host via Docker Compose. A public ALB forwards HTTP port 80 to Grafana port 3000. The Loki datasource and WAF dashboards are provisioned from those files at container startup — no manual setup required.
@@ -25,7 +28,9 @@ terraform output grafana_url
 Open the URL in a browser. Default credentials: **admin / admin**. Grafana prompts for a password change on first login.
 
 <Aside type="caution">
-  The ALB security group restricts ingress to your deployer's current public IP by default (via `data.http` `checkip.amazonaws.com`). If your IP changes, update `alb_ingress_cidrs` in `terraform.tfvars` and run `terraform apply` to refresh the security group rule.
+  The ALB security group restricts ingress to your deployer's current public IP by default (via
+  `data.http` `checkip.amazonaws.com`). If your IP changes, update `alb_ingress_cidrs` in
+  `terraform.tfvars` and run `terraform apply` to refresh the security group rule.
 </Aside>
 
 ## Provisioned datasource

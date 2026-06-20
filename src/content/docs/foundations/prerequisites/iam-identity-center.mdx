@@ -5,17 +5,17 @@ sidebar:
   label: IAM Identity Center
 ---
 
-import { Steps, Aside, Badge } from '@astrojs/starlight/components';
-import Checklist from '@/components/Checklist.astro';
-import Tooltip from '@/components/Tooltip.astro';
+import { Steps, Aside, Badge } from "@astrojs/starlight/components";
+import Checklist from "@/components/Checklist.astro";
+import Tooltip from "@/components/Tooltip.astro";
 
 <Checklist
   id="prereq-iam-identity-center"
   items={[
-    'IAM Identity Center enabled in the AWS Console',
-    'User (and optional group) created in the Identity Center directory',
-    'Permission set assigned to the user for the target account',
-    'AWS CLI profile configured for SSO login',
+    "IAM Identity Center enabled in the AWS Console",
+    "User (and optional group) created in the Identity Center directory",
+    "Permission set assigned to the user for the target account",
+    "AWS CLI profile configured for SSO login",
   ]}
 />
 
@@ -116,24 +116,26 @@ You need one-time root (or admin) access to enable IAM Identity Center; MFA on t
 
    The output should show your account ID and a role ARN from IAM Identity Center (not an IAM user ARN).
 
-   <Aside type="tip">
-     Set the profile as default so you do not need `--profile` on every command:
+    <Aside type="tip">
+Set the profile as default so you do not need `--profile` on every command:
 
-     ```bash frame="terminal"
-     export AWS_PROFILE=lmi-walkthrough
-     aws sts get-caller-identity
-     ```
+   ```bash frame="terminal"
+   export AWS_PROFILE=lmi-walkthrough
+   aws sts get-caller-identity
+   ```
 
-     Add the export to your shell profile (`~/.bashrc`, `~/.zshrc`) to persist it.
-   </Aside>
+   Add the export to your shell profile (`~/.bashrc`, `~/.zshrc`) to persist it.
 
-   <Aside type="note" title="Session expiry">
-     SSO sessions typically expire after 8-12 hours. When credentials expire, run `aws sso login --profile lmi-walkthrough` again. To check when the session expires:
+    </Aside>
 
-     ```bash frame="terminal"
-     jq -r 'select(.startUrl != null) | .expiresAt' ~/.aws/sso/cache/*.json
-     ```
-   </Aside>
+    <Aside type="note" title="Session expiry">
+SSO sessions typically expire after 8-12 hours. When credentials expire, run `aws sso login --profile lmi-walkthrough` again. To check when the session expires:
+
+   ```bash frame="terminal"
+   jq -r 'select(.startUrl != null) | .expiresAt' ~/.aws/sso/cache/*.json
+   ```
+
+    </Aside>
 
    <Aside type="note" title="Remove the profile later">
      To remove the profile, delete the `[profile lmi-walkthrough]` block from your AWS config file

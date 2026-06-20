@@ -5,20 +5,26 @@ sidebar:
   label: Lambda function
 ---
 
-import { Aside, Badge, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
-import Checklist from '@/components/Checklist.astro';
-import LambdaInvocationTriggersDiagram from '@/components/LambdaInvocationTriggersDiagram.astro';
+import { Aside, Badge, CardGrid, LinkCard, Steps } from "@astrojs/starlight/components";
+import Checklist from "@/components/Checklist.astro";
+import LambdaInvocationTriggersDiagram from "@/components/LambdaInvocationTriggersDiagram.astro";
 
 <Aside type="note">
-  Terraform code: [terraform-aws-lambda-managed-instance](https://github.com/jajera/terraform-aws-lambda-managed-instance). This lab follows **`examples/waf-loki/`**, which wires **`module "lambda_managed_function_waf"`** (Node.js 24) with S3 read, **`LOKI_URL`**, and event sources **outside** the module (S3 notification and **`aws_lambda_permission`**). The sections below use **illustrative** snippets for the module shape; the authoritative input list is [modules/lambda_managed_function variables](https://github.com/jajera/terraform-aws-lambda-managed-instance/blob/main/modules/lambda_managed_function/variables.tf).
+  Terraform code:
+  [terraform-aws-lambda-managed-instance](https://github.com/jajera/terraform-aws-lambda-managed-instance).
+  This lab follows **`examples/waf-loki/`**, which wires **`module "lambda_managed_function_waf"`**
+  (Node.js 24) with S3 read, **`LOKI_URL`**, and event sources **outside** the module (S3
+  notification and **`aws_lambda_permission`**). The sections below use **illustrative** snippets
+  for the module shape; the authoritative input list is [modules/lambda_managed_function
+  variables](https://github.com/jajera/terraform-aws-lambda-managed-instance/blob/main/modules/lambda_managed_function/variables.tf).
 </Aside>
 
 <Checklist
   id="walkthrough-lambda"
   items={[
-    '[LMI stack](/aws-lambda-managed-instance-walkthrough/walkthrough/lmi/) applied — `capacity_provider_arn` output is available',
-    'Read [Publishing & activation](/aws-lambda-managed-instance-walkthrough/overview/concepts/version-publishing/) — `capacity_provider_config` and `per_execution_environment_max_concurrency` are immutable after first create',
-    '`examples/waf-loki` cloned and `terraform init` succeeds',
+    "[LMI stack](/aws-lambda-managed-instance-walkthrough/walkthrough/lmi/) applied — `capacity_provider_arn` output is available",
+    "Read [Publishing & activation](/aws-lambda-managed-instance-walkthrough/overview/concepts/version-publishing/) — `capacity_provider_config` and `per_execution_environment_max_concurrency` are immutable after first create",
+    "`examples/waf-loki` cloned and `terraform init` succeeds",
   ]}
 />
 
@@ -29,7 +35,9 @@ The [LMI stack lab](/aws-lambda-managed-instance-walkthrough/walkthrough/lmi/) p
 Code blocks use **illustrative literals** so you can read the shape without tracing variables. Compare with **`examples/waf-loki`** (`lambda_managed_function_waf` in **`main.tf`**) when you apply.
 
 <Aside type="caution">
-  `capacity_provider_config` cannot be added or removed after the function is first created. **`per_execution_environment_max_concurrency`** is also **immutable** after first create. Plan both before the first `terraform apply` that creates the Lambda.
+  `capacity_provider_config` cannot be added or removed after the function is first created.
+  **`per_execution_environment_max_concurrency`** is also **immutable** after first create. Plan
+  both before the first `terraform apply` that creates the Lambda.
 </Aside>
 
 ## Identity

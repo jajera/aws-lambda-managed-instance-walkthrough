@@ -5,19 +5,24 @@ sidebar:
   label: LMI stack
 ---
 
-import { Aside, Badge, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
-import Checklist from '@/components/Checklist.astro';
+import { Aside, Badge, CardGrid, LinkCard, Steps } from "@astrojs/starlight/components";
+import Checklist from "@/components/Checklist.astro";
 
 <Aside type="note">
-  Terraform code: [terraform-aws-lambda-managed-instance](https://github.com/jajera/terraform-aws-lambda-managed-instance). This lab follows **`examples/waf-loki/main.tf`**, where `module "lambda_managed_instance"` sets **every** argument the [lambda_managed_instance](https://github.com/jajera/terraform-aws-lambda-managed-instance/tree/main/modules/lambda_managed_instance) module accepts so nothing is left implicit.
+  Terraform code:
+  [terraform-aws-lambda-managed-instance](https://github.com/jajera/terraform-aws-lambda-managed-instance).
+  This lab follows **`examples/waf-loki/main.tf`**, where `module "lambda_managed_instance"` sets
+  **every** argument the
+  [lambda_managed_instance](https://github.com/jajera/terraform-aws-lambda-managed-instance/tree/main/modules/lambda_managed_instance)
+  module accepts so nothing is left implicit.
 </Aside>
 
 <Checklist
   id="walkthrough-lmi"
   items={[
-    '[VPC and networking](/aws-lambda-managed-instance-walkthrough/walkthrough/networking/) lab done or stack understood',
-    'Read [Placement & capacity](/aws-lambda-managed-instance-walkthrough/overview/concepts/capacity-providers/) — instance requirements and scaling mode are set here',
-    '`examples/waf-loki` cloned and `terraform init` succeeds',
+    "[VPC and networking](/aws-lambda-managed-instance-walkthrough/walkthrough/networking/) lab done or stack understood",
+    "Read [Placement & capacity](/aws-lambda-managed-instance-walkthrough/overview/concepts/capacity-providers/) — instance requirements and scaling mode are set here",
+    "`examples/waf-loki` cloned and `terraform init` succeeds",
   ]}
 />
 

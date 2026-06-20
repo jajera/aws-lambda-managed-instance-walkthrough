@@ -5,23 +5,29 @@ sidebar:
   label: VPC & networking
 ---
 
-import { Steps, Aside, FileTree, Badge, CardGrid, LinkCard } from '@astrojs/starlight/components';
-import Checklist from '@/components/Checklist.astro';
-import Tooltip from '@/components/Tooltip.astro';
-import NetworkingVpcIpv4TrafficDiagram from '@/components/NetworkingVpcIpv4TrafficDiagram.astro';
+import { Steps, Aside, FileTree, Badge, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import Checklist from "@/components/Checklist.astro";
+import Tooltip from "@/components/Tooltip.astro";
+import NetworkingVpcIpv4TrafficDiagram from "@/components/NetworkingVpcIpv4TrafficDiagram.astro";
 
 <Aside type="note">
-  Terraform code: [terraform-aws-lambda-managed-instance](https://github.com/jajera/terraform-aws-lambda-managed-instance). This lab uses **[examples/waf-loki](https://github.com/jajera/terraform-aws-lambda-managed-instance/tree/main/examples/waf-loki)** and the shared **[modules/vpc](https://github.com/jajera/terraform-aws-lambda-managed-instance/tree/main/modules/vpc)** module (the same networking building block described in that repository’s own docs).
+  Terraform code:
+  [terraform-aws-lambda-managed-instance](https://github.com/jajera/terraform-aws-lambda-managed-instance).
+  This lab uses
+  **[examples/waf-loki](https://github.com/jajera/terraform-aws-lambda-managed-instance/tree/main/examples/waf-loki)**
+  and the shared
+  **[modules/vpc](https://github.com/jajera/terraform-aws-lambda-managed-instance/tree/main/modules/vpc)**
+  module (the same networking building block described in that repository’s own docs).
 </Aside>
 
 <Checklist
   id="walkthrough-networking"
   items={[
-    'Companion repo cloned and examples/waf-loki reachable',
-    'aws_region and availability_zones aligned in tfvars or variables',
-    'terraform init and terraform plan run without errors',
-    'terraform apply completed (or you understand what the plan will create)',
-    'Optional: VPC and subnets visible in the EC2 console',
+    "Companion repo cloned and examples/waf-loki reachable",
+    "aws_region and availability_zones aligned in tfvars or variables",
+    "terraform init and terraform plan run without errors",
+    "terraform apply completed (or you understand what the plan will create)",
+    "Optional: VPC and subnets visible in the EC2 console",
   ]}
 />
 
@@ -32,21 +38,17 @@ Lambda Managed Instances run managed <Tooltip term="ec2" /> capacity in **your**
 For **why** you might choose public subnets, endpoints, or NAT in production, read [VPC connectivity for Lambda Managed Instances](/aws-lambda-managed-instance-walkthrough/overview/concepts/networking/). For **placement** (subnets and security groups as the provider boundary), see [Placement & capacity](/aws-lambda-managed-instance-walkthrough/overview/concepts/capacity-providers/).
 
 <Aside type="caution">
-  `capacity_provider_config` cannot be added or removed after the function is first created. Plan your function configuration before the first `terraform apply` that creates the Lambda. See [Publishing & activation](/aws-lambda-managed-instance-walkthrough/overview/concepts/version-publishing/).
+  `capacity_provider_config` cannot be added or removed after the function is first created. Plan
+  your function configuration before the first `terraform apply` that creates the Lambda. See
+  [Publishing &
+  activation](/aws-lambda-managed-instance-walkthrough/overview/concepts/version-publishing/).
 </Aside>
 
 ## Repository layout
 
 <FileTree>
-- examples/waf-loki/
-  - **main.tf**
-  - **variables.tf**
-  - function/
-  - …
-- modules/vpc/
-  - **main.tf**
-  - **variables.tf**
-  - …
+  - examples/waf-loki/ - **main.tf** - **variables.tf** - function/ - … - modules/vpc/ - **main.tf**
+  - **variables.tf** - …
 </FileTree>
 
 ## Traffic path

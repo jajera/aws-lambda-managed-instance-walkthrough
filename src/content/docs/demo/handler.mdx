@@ -6,10 +6,11 @@ sidebar:
   label: Node.js 24 handler
 ---
 
-import { Aside, Steps } from '@astrojs/starlight/components';
+import { Aside, Steps } from "@astrojs/starlight/components";
 
 <Aside type="note">
-  Terraform code: [terraform-aws-lambda-managed-instance](https://github.com/jajera/terraform-aws-lambda-managed-instance).
+  Terraform code:
+  [terraform-aws-lambda-managed-instance](https://github.com/jajera/terraform-aws-lambda-managed-instance).
   Handler source: `examples/waf-loki/function-waf/index.mjs`.
 </Aside>
 
@@ -80,7 +81,9 @@ const values = lines.map((line) => {
     if (typeof obj.timestamp === "number") {
       tsNs = String(BigInt(obj.timestamp) * 1_000_000n);
     }
-  } catch { /* non-JSON line — use current time */ }
+  } catch {
+    /* non-JSON line — use current time */
+  }
   return [tsNs, line];
 });
 ```
@@ -125,8 +128,8 @@ The `stream` object defines the **label set** used for LogQL queries. The Grafan
 
 ## Environment variables
 
-| Variable | Injected by | Value |
-| --- | --- | --- |
+| Variable   | Injected by                                       | Value                                           |
+| ---------- | ------------------------------------------------- | ----------------------------------------------- |
 | `LOKI_URL` | Terraform (`environment_variables` on the module) | `http://<ec2-private-ip>:3100/loki/api/v1/push` |
 
 The EC2 private IP is resolved at `terraform apply` time from `aws_instance.obs.private_ip` and written into the Lambda function's environment. No DNS lookup at runtime.

@@ -17,9 +17,9 @@ Open the URL printed in the terminal (typically `http://localhost:4321`). Edits 
 
 ### Build and preview
 
-| Command | Use |
-| --- | --- |
-| `npm run dev` | Local authoring with live reload |
+| Command                                | Use                                                         |
+| -------------------------------------- | ----------------------------------------------------------- |
+| `npm run dev`                          | Local authoring with live reload                            |
 | `npm run build` then `npm run preview` | Production build from `dist/` (matches GitHub Pages output) |
 
 ## Deploy (GitHub Pages)
@@ -30,12 +30,12 @@ Open the URL printed in the terminal (typically `http://localhost:4321`). Edits 
 
 ## Project structure
 
-| Path | Role |
-| --- | --- |
-| `astro.config.mjs` | Astro / Starlight (site URL, `base`, theme, sidebar) |
+| Path                | Role                                                  |
+| ------------------- | ----------------------------------------------------- |
+| `astro.config.mjs`  | Astro / Starlight (site URL, `base`, theme, sidebar)  |
 | `src/content/docs/` | Markdown and MDX pages; filesystem drives the sidebar |
-| `public/` | Static assets (e.g. favicon) |
-| `.cursor/rules/` | Authoring conventions for editors and AI assistants |
+| `public/`           | Static assets (e.g. favicon)                          |
+| `.cursor/rules/`    | Authoring conventions for editors and AI assistants   |
 
 ## License
 

@@ -5,15 +5,15 @@ sidebar:
   label: Git
 ---
 
-import { Steps, Aside, Tabs, TabItem, Badge } from '@astrojs/starlight/components';
-import Checklist from '@/components/Checklist.astro';
+import { Steps, Aside, Tabs, TabItem, Badge } from "@astrojs/starlight/components";
+import Checklist from "@/components/Checklist.astro";
 
 <Checklist
   id="prereq-git"
   items={[
-    'Git installed',
-    'user.name and user.email configured globally',
-    'Terraform repo cloned locally',
+    "Git installed",
+    "user.name and user.email configured globally",
+    "Terraform repo cloned locally",
   ]}
 />
 
@@ -21,88 +21,93 @@ Git is used to clone the Terraform infrastructure repo used by this walkthrough.
 
 <Steps>
 
-1. **Install Git.** <Badge text="Required" variant="tip" size="small" />
+1.  **Install Git.** <Badge text="Required" variant="tip" size="small" />
 
-   <Tabs syncKey="os">
-     <TabItem label="macOS">
-      macOS ships with a system Git, but Homebrew's version is kept up to date:
+       <Tabs syncKey="os">
+  <TabItem label="macOS">
+   macOS ships with a system Git, but Homebrew's version is kept up to date:
 
-      ```bash frame="terminal"
-      brew install git
-      ```
-     </TabItem>
-     <TabItem label="Linux">
-      ```bash frame="terminal"
-      sudo apt-get update && sudo apt-get install -y git
-      ```
-     </TabItem>
-   </Tabs>
+    ```bash frame="terminal"
+    brew install git
+    ```
 
-   Verify:
+         </TabItem>
 
+      <TabItem label="Linux">
    ```bash frame="terminal"
-   git --version
+   sudo apt-get update && sudo apt-get install -y git
    ```
+  </TabItem>
+</Tabs>
 
-2. **Configure your identity.**
+    Verify:
 
-   Git requires a name and email for commits. This matters if you push any changes later (for example to your own fork of the Terraform repo).
+    ```bash frame="terminal"
+    git --version
+    ```
 
-   ```bash frame="terminal"
-   git config --global user.name "Your Name"
-   git config --global user.email "you@example.com"
-   ```
+2.  **Configure your identity.**
 
-   Confirm the settings:
+    Git requires a name and email for commits. This matters if you push any changes later (for example to your own fork of the Terraform repo).
 
-   ```bash frame="terminal"
-   git config --global --list
-   ```
+    ```bash frame="terminal"
+    git config --global user.name "Your Name"
+    git config --global user.email "you@example.com"
+    ```
 
-3. **Clone the Terraform infrastructure repo.** <Badge text="Required" variant="tip" size="small" />
+    Confirm the settings:
 
-   The Terraform code for this walkthrough lives in a separate repository. Clone it into your workspace directory.
+    ```bash frame="terminal"
+    git config --global --list
+    ```
 
-   <Aside type="note">
-     Repository: [terraform-aws-lambda-managed-instance](https://github.com/jajera/terraform-aws-lambda-managed-instance). This walkthrough uses **`examples/waf-loki`** and shared modules under **`modules/`** (see that repository’s own documentation for the full tree).
-   </Aside>
+3.  **Clone the Terraform infrastructure repo.** <Badge text="Required" variant="tip" size="small" />
 
-   ```bash frame="terminal"
-   cd ~/workspace
-   git clone https://github.com/jajera/terraform-aws-lambda-managed-instance.git
-   cd terraform-aws-lambda-managed-instance
-   ```
+    The Terraform code for this walkthrough lives in a separate repository. Clone it into your workspace directory.
 
-   Confirm the clone worked:
+    <Aside type="note">
+      Repository:
+      [terraform-aws-lambda-managed-instance](https://github.com/jajera/terraform-aws-lambda-managed-instance).
+      This walkthrough uses **`examples/waf-loki`** and shared modules under **`modules/`** (see
+      that repository’s own documentation for the full tree).
+    </Aside>
 
-   ```bash frame="terminal"
-   ls
-   ```
+    ```bash frame="terminal"
+    cd ~/workspace
+    git clone https://github.com/jajera/terraform-aws-lambda-managed-instance.git
+    cd terraform-aws-lambda-managed-instance
+    ```
 
-   You should see `README.md`, `modules/`, `examples/waf-loki/`, and other Terraform files as described in that repository.
+    Confirm the clone worked:
 
-4. **Optional: use SSH instead of HTTPS.**
+    ```bash frame="terminal"
+    ls
+    ```
 
-   If you have an SSH key configured with GitHub, use SSH to avoid entering your credentials on every `git pull`:
+    You should see `README.md`, `modules/`, `examples/waf-loki/`, and other Terraform files as described in that repository.
 
-   ```bash frame="terminal"
-   git clone git@github.com:jajera/terraform-aws-lambda-managed-instance.git
-   ```
+4.  **Optional: use SSH instead of HTTPS.**
 
-   To set up an SSH key: [GitHub docs - generating a new SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent).
+    If you have an SSH key configured with GitHub, use SSH to avoid entering your credentials on every `git pull`:
 
-5. **Verify the remote.**
+    ```bash frame="terminal"
+    git clone git@github.com:jajera/terraform-aws-lambda-managed-instance.git
+    ```
 
-   ```bash frame="terminal"
-   git remote -v
-   ```
+    To set up an SSH key: [GitHub docs - generating a new SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent).
 
-   Expected output:
+5.  **Verify the remote.**
 
-   ```
-   origin  https://github.com/jajera/terraform-aws-lambda-managed-instance.git (fetch)
-   origin  https://github.com/jajera/terraform-aws-lambda-managed-instance.git (push)
-   ```
+    ```bash frame="terminal"
+    git remote -v
+    ```
+
+    Expected output:
+
+    ```
+    origin  https://github.com/jajera/terraform-aws-lambda-managed-instance.git (fetch)
+    origin  https://github.com/jajera/terraform-aws-lambda-managed-instance.git (push)
+    ```
 
 </Steps>
 

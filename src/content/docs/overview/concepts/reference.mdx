@@ -5,19 +5,19 @@ sidebar:
   label: Decision guide & reference
 ---
 
-import { Aside, Badge, Card, CardGrid } from '@astrojs/starlight/components';
+import { Aside, Badge, Card, CardGrid } from "@astrojs/starlight/components";
 
 Deeper **comparison**, **economics**, and **integrations** are consolidated here so **[LMI fundamentals](/aws-lambda-managed-instance-walkthrough/overview/concepts/)** articles stay concise. Account and local tooling live under **[Foundations](/aws-lambda-managed-instance-walkthrough/foundations/)** and **[Prerequisites](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/)**. Step-by-step apply procedures will ship under **[Walkthrough](/aws-lambda-managed-instance-walkthrough/walkthrough/)**; this page stays conceptual until those batches exist.
 
 <h2 id="comparison">Comparison</h2>
 
-| Dimension | Lambda (default) | LMI |
-| --- | --- | --- |
-| **Concurrency** | One execution environment handles at most **one** invocation at a time | **Multi-concurrent** invocations per environment — strong fit for **IO-heavy** work ([AWS](https://docs.aws.amazon.com/lambda/latest/dg/lambda-managed-instances.html)) |
-| **Tenancy** | **Multi-tenant**, **Firecracker** microVMs on **Shared Lambda infrastructure** | **Your account**, **Nitro** EC2, **containers**; **capacity provider** as security boundary |
-| **Pricing** | Per-request duration | EC2-style instance cost + **15%** management fee |
-| **Scaling** | Cold starts possible; **scales to zero** | CPU-based, asynchronous; **no cold starts** in the default-Lambda sense; baseline capacity per AWS docs |
-| **Best for** | Bursty / intermittent / scale-to-zero wins | Sustained, predictable throughput; EC2 pricing / hardware flexibility |
+| Dimension       | Lambda (default)                                                               | LMI                                                                                                                                                                     |
+| --------------- | ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Concurrency** | One execution environment handles at most **one** invocation at a time         | **Multi-concurrent** invocations per environment — strong fit for **IO-heavy** work ([AWS](https://docs.aws.amazon.com/lambda/latest/dg/lambda-managed-instances.html)) |
+| **Tenancy**     | **Multi-tenant**, **Firecracker** microVMs on **Shared Lambda infrastructure** | **Your account**, **Nitro** EC2, **containers**; **capacity provider** as security boundary                                                                             |
+| **Pricing**     | Per-request duration                                                           | EC2-style instance cost + **15%** management fee                                                                                                                        |
+| **Scaling**     | Cold starts possible; **scales to zero**                                       | CPU-based, asynchronous; **no cold starts** in the default-Lambda sense; baseline capacity per AWS docs                                                                 |
+| **Best for**    | Bursty / intermittent / scale-to-zero wins                                     | Sustained, predictable throughput; EC2 pricing / hardware flexibility                                                                                                   |
 
 ## Supported instance types (requirements, not names)
 
@@ -32,23 +32,23 @@ You declare **requirements** (for example `x86_64` vs `arm64`); Lambda picks a c
 
 ## Pricing
 
-| Component | Calculation |
-| --- | --- |
-| **Instance cost** | EC2 On-Demand or discounted (Savings Plans / RIs on **compute**, not the fee) |
-| **Management fee** | **15%** on top of EC2 instance cost |
-| **Granularity** | EC2 hourly — not per-100 ms like default Lambda |
-| **Minimum cost** | Baseline capacity is always on — **zero traffic is not zero bill** |
+| Component          | Calculation                                                                   |
+| ------------------ | ----------------------------------------------------------------------------- |
+| **Instance cost**  | EC2 On-Demand or discounted (Savings Plans / RIs on **compute**, not the fee) |
+| **Management fee** | **15%** on top of EC2 instance cost                                           |
+| **Granularity**    | EC2 hourly — not per-100 ms like default Lambda                               |
+| **Minimum cost**   | Baseline capacity is always on — **zero traffic is not zero bill**            |
 
 ## Event source integrations
 
 LMI supports the **same event sources** as default Lambda ([AWS](https://docs.aws.amazon.com/lambda/latest/dg/lambda-managed-instances.html)).
 
-| Integration | Notes |
-| --- | --- |
-| **S3** | Object notifications and batch patterns |
-| **SQS** | High throughput benefits from multi-concurrency per environment |
-| **API Gateway / ALB** | Steady HTTP traffic — fewer latency spikes vs cold-start-heavy setups |
-| **SNS / EventBridge / Kinesis** | Same integration model as default Lambda |
+| Integration                     | Notes                                                                 |
+| ------------------------------- | --------------------------------------------------------------------- |
+| **S3**                          | Object notifications and batch patterns                               |
+| **SQS**                         | High throughput benefits from multi-concurrency per environment       |
+| **API Gateway / ALB**           | Steady HTTP traffic — fewer latency spikes vs cold-start-heavy setups |
+| **SNS / EventBridge / Kinesis** | Same integration model as default Lambda                              |
 
 <h2 id="known-limitations">Out of scope and known limitations</h2>
 
@@ -71,7 +71,8 @@ LMI supports the **same event sources** as default Lambda ([AWS](https://docs.aw
   </Card>
   <Card title="High-throughput queues" icon="seti:db">
     <Badge text="Often LMI" variant="success" />
-    Many in-flight messages per execution environment without provisioning large reserved concurrency on default Lambda.
+    Many in-flight messages per execution environment without provisioning large reserved
+    concurrency on default Lambda.
   </Card>
   <Card title="VPC-bound workloads" icon="seti:lock">
     <Badge text="Often LMI" variant="success" />

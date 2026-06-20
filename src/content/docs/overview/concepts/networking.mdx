@@ -5,7 +5,7 @@ sidebar:
   label: Networking
 ---
 
-import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 Functions on LMI run in **your VPC**. You still need a deliberate path for **outbound** access: other AWS services (for example S3, DynamoDB), **CloudWatch Logs**, and **X-Ray** telemetry. Without it, those calls fail even when IAM allows them.
 

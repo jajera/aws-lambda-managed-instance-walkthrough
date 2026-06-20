@@ -5,7 +5,7 @@ sidebar:
   label: Publishing & activation
 ---
 
-import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 Publishing is the step that turns a **configured** function plus capacity provider into **running** managed capacity and an **ACTIVE** function version in your account.
 
@@ -13,25 +13,27 @@ For API behaviour, timing, and region-specific details, use [Lambda Managed Inst
 
 ## End-to-end sequence
 
-| Step | What you configure | Result |
-| --- | --- | --- |
-| **1** | **Capacity provider** — VPC, instance requirements, scaling limits | Placement and fleet bounds for LMI |
-| **2** | **Function** with **`capacity_provider_config`** pointing at that provider | Function is bound to managed capacity (not Shared Lambda infrastructure for execution) |
-| **3** | **Publish** a function **version** | Lambda readies **managed instances** and **execution environments**; the version becomes **ACTIVE** when the fleet is ready |
+| Step  | What you configure                                                         | Result                                                                                                                      |
+| ----- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **1** | **Capacity provider** — VPC, instance requirements, scaling limits         | Placement and fleet bounds for LMI                                                                                          |
+| **2** | **Function** with **`capacity_provider_config`** pointing at that provider | Function is bound to managed capacity (not Shared Lambda infrastructure for execution)                                      |
+| **3** | **Publish** a function **version**                                         | Lambda readies **managed instances** and **execution environments**; the version becomes **ACTIVE** when the fleet is ready |
 
 Publishing is a **versioned** milestone: until the version is **ACTIVE**, it is not the live target for traffic on that release.
 
 ## What happens when you publish
 
-| Topic | Behaviour |
-| --- | --- |
-| **Managed instances** | Lambda starts **managed instances** in your account. By default AWS uses **three instances** for **Availability Zone** resiliency and brings up **three execution environments** before marking the version **ACTIVE**. |
-| **Reuse on busy providers** | If the capacity provider **already** runs other functions, Lambda **may** host the new version’s environments on **existing** instances when spare capacity exists, instead of adding instances. |
+| Topic                       | Behaviour                                                                                                                                                                                                               |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Managed instances**       | Lambda starts **managed instances** in your account. By default AWS uses **three instances** for **Availability Zone** resiliency and brings up **three execution environments** before marking the version **ACTIVE**. |
+| **Reuse on busy providers** | If the capacity provider **already** runs other functions, Lambda **may** host the new version’s environments on **existing** instances when spare capacity exists, instead of adding instances.                        |
 
 For the three-step overview in narrative form, see [Introduction](/aws-lambda-managed-instance-walkthrough/overview/).
 
 <Aside type="caution">
-  `capacity_provider_config` cannot be added or removed after the function is first created. Decide whether the function runs on LMI before you create that function. See also [Placement & capacity](/aws-lambda-managed-instance-walkthrough/overview/concepts/capacity-providers/).
+  `capacity_provider_config` cannot be added or removed after the function is first created. Decide
+  whether the function runs on LMI before you create that function. See also [Placement &
+  capacity](/aws-lambda-managed-instance-walkthrough/overview/concepts/capacity-providers/).
 </Aside>
 
 ## See also

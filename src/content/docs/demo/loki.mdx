@@ -6,11 +6,13 @@ sidebar:
   label: Loki
 ---
 
-import { Aside } from '@astrojs/starlight/components';
+import { Aside } from "@astrojs/starlight/components";
 
 <Aside type="note">
-  Terraform code: [terraform-aws-lambda-managed-instance](https://github.com/jajera/terraform-aws-lambda-managed-instance).
-  EC2 bootstrap: `examples/waf-loki/templates/user_data.sh.tftpl` (dashboards: `templates/dashboards/`).
+  Terraform code:
+  [terraform-aws-lambda-managed-instance](https://github.com/jajera/terraform-aws-lambda-managed-instance).
+  EC2 bootstrap: `examples/waf-loki/templates/user_data.sh.tftpl` (dashboards:
+  `templates/dashboards/`).
 </Aside>
 
 Loki runs in **monolithic mode** on a single `t3.small` EC2 instance in a private subnet. Docker Compose manages both Loki and Grafana on the same host.
@@ -65,14 +67,16 @@ Chunks and TSDB index write to `/loki` inside the container, which maps to a Doc
 
 ## Storage durability
 
-| Event | Effect on Loki data |
-| --- | --- |
-| Instance **reboot** or stop/start | Data retained — same EBS volume reattaches |
-| Instance **replacement** (Terraform taint, hardware failure) | Data lost — new root volume |
-| S3 WAF log objects | Always retained in the WAF log bucket; manual re-upload re-drives ingestion |
+| Event                                                        | Effect on Loki data                                                         |
+| ------------------------------------------------------------ | --------------------------------------------------------------------------- |
+| Instance **reboot** or stop/start                            | Data retained — same EBS volume reattaches                                  |
+| Instance **replacement** (Terraform taint, hardware failure) | Data lost — new root volume                                                 |
+| S3 WAF log objects                                           | Always retained in the WAF log bucket; manual re-upload re-drives ingestion |
 
 <Aside type="tip">
-  If you need Loki data to survive instance replacement, configure the S3 storage backend instead (`storage_config.aws` with TSDB shipper). For this demo, EBS is sufficient and keeps the stack simple.
+  If you need Loki data to survive instance replacement, configure the S3 storage backend instead
+  (`storage_config.aws` with TSDB shipper). For this demo, EBS is sufficient and keeps the stack
+  simple.
 </Aside>
 
 ## Network path: Lambda → Loki

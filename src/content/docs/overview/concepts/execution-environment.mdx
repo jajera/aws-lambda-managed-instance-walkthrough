@@ -5,15 +5,17 @@ sidebar:
   label: Concurrency & runtimes
 ---
 
-import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
-import ExecutionEnvironmentDefaultVsLmiDiagram from '@/components/ExecutionEnvironmentDefaultVsLmiDiagram.astro';
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import ExecutionEnvironmentDefaultVsLmiDiagram from "@/components/ExecutionEnvironmentDefaultVsLmiDiagram.astro";
 
 The fundamental difference is **where and how** execution environments run and how many invocations each environment can handle at once.
 
 <ExecutionEnvironmentDefaultVsLmiDiagram />
 
 <Aside type="note">
-  For quota- and region-sensitive behaviour, use [Lambda Managed Instances](https://docs.aws.amazon.com/lambda/latest/dg/lambda-managed-instances.html) as the product reference.
+  For quota- and region-sensitive behaviour, use [Lambda Managed
+  Instances](https://docs.aws.amazon.com/lambda/latest/dg/lambda-managed-instances.html) as the
+  product reference.
 </Aside>
 
 ## Concurrency model
@@ -27,18 +29,21 @@ Multi-concurrency changes how you think about **thread safety**, **global state*
 
 LMI does not support every default-Lambda runtime. The supported **language floors** and **multi-concurrency behaviour** are defined on the product pages; the table below matches the [Supported languages](https://docs.aws.amazon.com/lambda/latest/dg/lambda-managed-instances-runtimes.html#supported-languages) list as of that document.
 
-| Language | Minimum (per AWS) | Example `runtime` values | Multi-concurrency (per AWS) |
-| --- | --- | --- | --- |
-| **Java** | Java 21 and later | `java21`, … (newer managed identifiers as AWS adds them) | One process, OS threads — handler must be thread-safe |
-| **Python** | Python 3.13 and later | `python3.14`, `python3.13`, … | One process **per concurrent request** — watch shared resources such as `/tmp` |
-| **Node.js** | Node.js 22 and later | `nodejs22.x`, `nodejs24.x`, … | Worker threads + async; safe shared state |
-| **.NET** | .NET 8 and later | `dotnet8`, … | Tasks / async; safe shared state |
-| **Rust** | OS-only **`provided.al2023` and later** | `provided.al2023`, … | One process, Tokio tasks — handler `Clone` + `Send` |
+| Language    | Minimum (per AWS)                       | Example `runtime` values                                 | Multi-concurrency (per AWS)                                                    |
+| ----------- | --------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| **Java**    | Java 21 and later                       | `java21`, … (newer managed identifiers as AWS adds them) | One process, OS threads — handler must be thread-safe                          |
+| **Python**  | Python 3.13 and later                   | `python3.14`, `python3.13`, …                            | One process **per concurrent request** — watch shared resources such as `/tmp` |
+| **Node.js** | Node.js 22 and later                    | `nodejs22.x`, `nodejs24.x`, …                            | Worker threads + async; safe shared state                                      |
+| **.NET**    | .NET 8 and later                        | `dotnet8`, …                                             | Tasks / async; safe shared state                                               |
+| **Rust**    | OS-only **`provided.al2023` and later** | `provided.al2023`, …                                     | One process, Tokio tasks — handler `Clone` + `Send`                            |
 
 Exact `runtime` strings, region availability, and new language versions live in the language topics and API reference. Use the [LMI runtimes hub](https://docs.aws.amazon.com/lambda/latest/dg/lambda-managed-instances-runtimes.html) (and **Next steps** there) before you pin a `runtime` value in config.
 
 <Aside type="caution">
-  **Multi-concurrency changes isolation semantics versus default Lambda.** Whether invocations share a process, threads, or separate processes depends on the **runtime** (see the table above and the language topics linked from the hub). Treat global state, caches, connections, and `/tmp` accordingly before you migrate or raise concurrency.
+  **Multi-concurrency changes isolation semantics versus default Lambda.** Whether invocations share
+  a process, threads, or separate processes depends on the **runtime** (see the table above and the
+  language topics linked from the hub). Treat global state, caches, connections, and `/tmp`
+  accordingly before you migrate or raise concurrency.
 </Aside>
 
 ## See also
