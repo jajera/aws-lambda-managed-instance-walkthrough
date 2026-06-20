@@ -6,14 +6,32 @@ Built with [Astro Starlight](https://starlight.astro.build).
 
 ## Quick start
 
-**Node.js** `>= 18.20.8` (see `.nvmrc` for the project’s preferred version).
+**Node.js** **22** (see `.nvmrc`).
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-Open the URL printed in the terminal (typically `http://localhost:4321`). Edits under `src/content/docs/` hot-reload.
+Open the URL printed in the terminal (typically `http://localhost:4321/aws-lambda-managed-instance-walkthrough/`). Edits under `src/content/docs/` hot-reload.
+
+## Scripts
+
+| Script             | Purpose                                            |
+| ------------------ | -------------------------------------------------- |
+| `npm run dev`      | Start local development server                     |
+| `npm run build`    | Production build to `dist/`                        |
+| `npm run preview`  | Serve the production build locally                 |
+| `npm run validate` | Prettier check + markdownlint on MDX               |
+| `npm run format`   | Auto-format with Prettier                          |
+| `npm run lint`     | Lint MDX files in `src/`                           |
+| `npm run test`     | Property-based content tests (Vitest + fast-check) |
+
+Run the full quality gate before committing:
+
+```bash
+npm run validate && npm run test && npm run build
+```
 
 ### Build and preview
 
@@ -22,11 +40,17 @@ Open the URL printed in the terminal (typically `http://localhost:4321`). Edits 
 | `npm run dev`                          | Local authoring with live reload                            |
 | `npm run build` then `npm run preview` | Production build from `dist/` (matches GitHub Pages output) |
 
+## CI
+
+Pull requests run [`.github/workflows/ci.yml`](.github/workflows/ci.yml) — markdown lint and commit message checks via [actionsforge/actions](https://github.com/actionsforge/actions).
+
 ## Deploy (GitHub Pages)
 
 1. **Settings → Pages → Build and deployment:** set **Source** to **GitHub Actions**.
 2. Push to **`main`** (or run **Deploy to GitHub Pages** manually) to build and publish via `.github/workflows/deploy.yml`.
 3. `astro.config.mjs` defines `site` and `base` for this repository; adjust if you fork to a different path.
+
+Pushes to `main` validate, test, build, and deploy to GitHub Pages at `/aws-lambda-managed-instance-walkthrough/`.
 
 ## Project structure
 

@@ -1,4 +1,7 @@
-dist
-node_modules
-.astro
-*.min.js
+node_modules/
+dist/
+.astro/
+package-lock.json
+src/content/docs/foundations/prerequisites/aws-cli.mdx
+src/content/docs/foundations/prerequisites/git.mdx
+src/content/docs/foundations/prerequisites/terraform.mdx
