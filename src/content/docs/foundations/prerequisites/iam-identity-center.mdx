@@ -39,109 +39,111 @@ You need one-time root (or admin) access to enable IAM Identity Center; MFA on t
 
 <Steps>
 
-1. **Enable IAM Identity Center.** <Badge text="Optional" variant="note" size="small" />
+1.  **Enable IAM Identity Center.** <Badge text="Optional" variant="note" size="small" />
 
-   In the AWS Console, search for **IAM Identity Center** (or find it under Security, Identity and Compliance).
-   - Click **Enable**
-   - On the identity source prompt, keep the default: **Identity Center directory** (unless you already have an external IdP such as Okta or Azure AD; connect it here if so)
-   - Choose the same region you selected in the [AWS Account](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/aws-account/) step. IAM Identity Center is a regional service; the region you enable it in is where the service runs
+    In the AWS Console, search for **IAM Identity Center** (or find it under Security, Identity and Compliance).
+    - Click **Enable**
+    - On the identity source prompt, keep the default: **Identity Center directory** (unless you already have an external IdP such as Okta or Azure AD; connect it here if so)
+    - Choose the same region you selected in the [AWS Account](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/aws-account/) step. IAM Identity Center is a regional service; the region you enable it in is where the service runs
 
-   <Aside type="note">
-     If you see "IAM Identity Center is already enabled", someone (or a prior setup) has already
-     done this. Click through to check the existing configuration before creating new users.
-   </Aside>
-
-2. **Create a user in the Identity Center directory.**
-
-   In IAM Identity Center:
-   - Left nav: **Users** then **Add user**
-   - Enter a username and email address (for example name `Admin` and your email)
-   - Fill in first name, last name
-   - Leave **Send an email to the user with password setup instructions** checked; you will receive an activation email
-   - Click **Add user**
-
-   Check your email and complete the account activation (set a password and configure MFA for the Identity Center user too).
-
-3. **Create a group (optional but recommended).**
-
-   Groups let you assign permission sets to multiple users at once.
-   - Left nav: **Groups** then **Create group**
-   - Name it (for example `Admins` or `LMI-Walkthrough`)
-   - Add your user to the group
-
-4. **Create a permission set.**
-
-   A permission set defines what the user (or group) can do in an account.
-   - Left nav: **Permission sets** then **Create permission set**
-   - Choose **Predefined permission set** then **AdministratorAccess** (for the walkthrough; scope it down for production use)
-   - Accept defaults for session duration (1 hour is fine; extend to 8 hours if your Terraform runs take longer)
-   - Name it (for example `AdministratorAccess`) and create it
-
-5. **Assign the user (or group) to the AWS account.**
-   - Left nav: **AWS accounts** then select your account from the list
-   - Click **Assign users or groups**
-   - Choose your user (or group), then Next
-   - Choose the permission set you just created, then Next, then Submit
-
-   Wait a moment for the assignment to apply.
-
-6. **Verify console access (optional but recommended).**
-
-   In IAM Identity Center then **Settings**, copy the **Access portal URL** (for example `https://d-xxxxxxxxxx.awsapps.com/start`). Open it in a browser, sign in with the Identity Center user you created, and click **Management Console** for your account to confirm access.
-
-7. **Configure the AWS CLI to use IAM Identity Center.** <Badge text="Required if using SSO" variant="tip" size="small" />
-
-   Requires **AWS CLI v2** (see [AWS CLI](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/aws-cli/) to install). After the CLI is installed, run:
-
-   ```bash frame="terminal"
-   aws configure sso
-   ```
-
-   You will be asked for:
-   - **SSO session name** - any name (for example `my-sso`)
-   - **SSO start URL** - find this in IAM Identity Center then Settings (looks like `https://d-xxxxxxxxxx.awsapps.com/start`)
-   - **SSO region** - the region where you enabled IAM Identity Center (for example `ap-southeast-2`)
-   - **SSO registration scopes** - press Enter to accept the default (`sso:account:access`)
-   - A browser opens for you to sign in and approve access
-   - Back in the terminal: choose the account and permission set, then set a profile name (for example `lmi-walkthrough`)
-   - **Default client Region** - use the same region as your SSO region (for example `ap-southeast-2`)
-   - Default output format: `json`
-
-8. **Log in and verify.**
-
-   ```bash frame="terminal"
-   aws sso login --profile lmi-walkthrough
-   aws sts get-caller-identity --profile lmi-walkthrough
-   ```
-
-   The output should show your account ID and a role ARN from IAM Identity Center (not an IAM user ARN).
-
-    <Aside type="tip">
-Set the profile as default so you do not need `--profile` on every command:
-
-   ```bash frame="terminal"
-   export AWS_PROFILE=lmi-walkthrough
-   aws sts get-caller-identity
-   ```
-
-   Add the export to your shell profile (`~/.bashrc`, `~/.zshrc`) to persist it.
-
+    <Aside type="note">
+      If you see "IAM Identity Center is already enabled", someone (or a prior setup) has already
+      done this. Click through to check the existing configuration before creating new users.
     </Aside>
 
-    <Aside type="note" title="Session expiry">
-SSO sessions typically expire after 8-12 hours. When credentials expire, run `aws sso login --profile lmi-walkthrough` again. To check when the session expires:
+2.  **Create a user in the Identity Center directory.**
 
-   ```bash frame="terminal"
-   jq -r 'select(.startUrl != null) | .expiresAt' ~/.aws/sso/cache/*.json
-   ```
+    In IAM Identity Center:
+    - Left nav: **Users** then **Add user**
+    - Enter a username and email address (for example name `Admin` and your email)
+    - Fill in first name, last name
+    - Leave **Send an email to the user with password setup instructions** checked; you will receive an activation email
+    - Click **Add user**
 
+    Check your email and complete the account activation (set a password and configure MFA for the Identity Center user too).
+
+3.  **Create a group (optional but recommended).**
+
+    Groups let you assign permission sets to multiple users at once.
+    - Left nav: **Groups** then **Create group**
+    - Name it (for example `Admins` or `LMI-Walkthrough`)
+    - Add your user to the group
+
+4.  **Create a permission set.**
+
+    A permission set defines what the user (or group) can do in an account.
+    - Left nav: **Permission sets** then **Create permission set**
+    - Choose **Predefined permission set** then **AdministratorAccess** (for the walkthrough; scope it down for production use)
+    - Accept defaults for session duration (1 hour is fine; extend to 8 hours if your Terraform runs take longer)
+    - Name it (for example `AdministratorAccess`) and create it
+
+5.  **Assign the user (or group) to the AWS account.**
+    - Left nav: **AWS accounts** then select your account from the list
+    - Click **Assign users or groups**
+    - Choose your user (or group), then Next
+    - Choose the permission set you just created, then Next, then Submit
+
+    Wait a moment for the assignment to apply.
+
+6.  **Verify console access (optional but recommended).**
+
+    In IAM Identity Center then **Settings**, copy the **Access portal URL** (for example `https://d-xxxxxxxxxx.awsapps.com/start`). Open it in a browser, sign in with the Identity Center user you created, and click **Management Console** for your account to confirm access.
+
+7.  **Configure the AWS CLI to use IAM Identity Center.** <Badge text="Required if using SSO" variant="tip" size="small" />
+
+    Requires **AWS CLI v2** (see [AWS CLI](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/aws-cli/) to install). After the CLI is installed, run:
+
+    ```bash frame="terminal"
+    aws configure sso
+    ```
+
+    You will be asked for:
+    - **SSO session name** - any name (for example `my-sso`)
+    - **SSO start URL** - find this in IAM Identity Center then Settings (looks like `https://d-xxxxxxxxxx.awsapps.com/start`)
+    - **SSO region** - the region where you enabled IAM Identity Center (for example `ap-southeast-2`)
+    - **SSO registration scopes** - press Enter to accept the default (`sso:account:access`)
+    - A browser opens for you to sign in and approve access
+    - Back in the terminal: choose the account and permission set, then set a profile name (for example `lmi-walkthrough`)
+    - **Default client Region** - use the same region as your SSO region (for example `ap-southeast-2`)
+    - Default output format: `json`
+
+8.  **Log in and verify.**
+
+    ```bash frame="terminal"
+    aws sso login --profile lmi-walkthrough
+    aws sts get-caller-identity --profile lmi-walkthrough
+    ```
+
+    The output should show your account ID and a role ARN from IAM Identity Center (not an IAM user ARN).
+
+        <Aside type="tip">
+
+    Set the profile as default so you do not need `--profile` on every command:
+
+    ```bash frame="terminal"
+    export AWS_PROFILE=lmi-walkthrough
+    aws sts get-caller-identity
+    ```
+
+    Add the export to your shell profile (`~/.bashrc`, `~/.zshrc`) to persist it.
+
+        </Aside>
+
+        <Aside type="note" title="Session expiry">
+
+    SSO sessions typically expire after 8-12 hours. When credentials expire, run `aws sso login --profile lmi-walkthrough` again. To check when the session expires:
+
+    ```bash frame="terminal"
+    jq -r 'select(.startUrl != null) | .expiresAt' ~/.aws/sso/cache/*.json
+    ```
+
+        </Aside>
+
+    <Aside type="note" title="Remove the profile later">
+      To remove the profile, delete the `[profile lmi-walkthrough]` block from your AWS config file
+      (for example `$HOME/.aws/config`) and any related entries in `$HOME/.aws/credentials` if
+      present.
     </Aside>
-
-   <Aside type="note" title="Remove the profile later">
-     To remove the profile, delete the `[profile lmi-walkthrough]` block from your AWS config file
-     (for example `$HOME/.aws/config`) and any related entries in `$HOME/.aws/credentials` if
-     present.
-   </Aside>
 
 </Steps>
 
