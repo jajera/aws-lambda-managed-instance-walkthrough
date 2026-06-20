@@ -5,27 +5,27 @@ sidebar:
   label: IAM roles
 ---
 
-import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 LMI splits IAM into two distinct role domains. Keep this separation explicit so application permissions and fleet-operator permissions are reviewed independently.
 
 ## Role boundary model
 
-| Role domain | Principal using it | Scope |
-| --- | --- | --- |
-| **Function execution role** | Your function runtime | Application behavior: logs, service calls, data-plane access |
+| Role domain                   | Principal using it            | Scope                                                             |
+| ----------------------------- | ----------------------------- | ----------------------------------------------------------------- |
+| **Function execution role**   | Your function runtime         | Application behavior: logs, service calls, data-plane access      |
 | **Managed-EC2 operator role** | Lambda service on your behalf | Fleet operations for managed instances tied to capacity providers |
 
 The execution role answers **what your function code can do at runtime**. The operator role answers **what the Lambda service can do in your account to create and operate capacity-provider fleet resources**.
 
 ## Trust and review checkpoints
 
-| Checkpoint | What to validate |
-| --- | --- |
-| **Trust policy separation** | The runtime principal and Lambda operator principal are not conflated into one broad role |
-| **Least privilege** | Execution role is limited to app/runtime needs; operator role is limited to managed-fleet operations |
-| **Auditability** | Role purpose and ownership are clear in IAM naming, tagging, and policy documentation |
-| **Operational boundary** | Managed instances are Lambda-operated capacity, not general EC2 admin targets |
+| Checkpoint                  | What to validate                                                                                     |
+| --------------------------- | ---------------------------------------------------------------------------------------------------- |
+| **Trust policy separation** | The runtime principal and Lambda operator principal are not conflated into one broad role            |
+| **Least privilege**         | Execution role is limited to app/runtime needs; operator role is limited to managed-fleet operations |
+| **Auditability**            | Role purpose and ownership are clear in IAM naming, tagging, and policy documentation                |
+| **Operational boundary**    | Managed instances are Lambda-operated capacity, not general EC2 admin targets                        |
 
 For policy names, service-trust details, and release-specific behavior, use [Lambda Managed Instances](https://docs.aws.amazon.com/lambda/latest/dg/lambda-managed-instances.html) as the product reference.
 

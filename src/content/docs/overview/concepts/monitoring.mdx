@@ -5,7 +5,7 @@ sidebar:
   label: Monitoring
 ---
 
-import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 LMI publishes **CloudWatch** metrics so you can watch **fleet utilisation**, **remaining capacity**, and **per-function execution environment** behaviour. Metrics help right-size memory, interpret scaling, and spot concurrency pressure.
 
@@ -13,9 +13,9 @@ For full metric lists, dimensions, and console navigation, use [Monitoring Lambd
 
 ## Two metric scopes
 
-| Scope | What it answers | Example dimensions (per AWS) |
-| --- | --- | --- |
-| **Capacity provider** | How hard the **managed fleet** is working and how much headroom remains | **CapacityProviderName**, **InstanceType** |
+| Scope                     | What it answers                                                                     | Example dimensions (per AWS)                             |
+| ------------------------- | ----------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| **Capacity provider**     | How hard the **managed fleet** is working and how much headroom remains             | **CapacityProviderName**, **InstanceType**               |
 | **Execution environment** | How a **specific function version** uses CPU, memory, and concurrency on that fleet | **CapacityProviderName**, **FunctionName**, **Resource** |
 
 For LMI, the **Resource** dimension on execution-environment metrics targets **function versions** — format **`<FunctionName>:<FunctionVersion>`** (not aliases-only semantics in the same way).
@@ -24,19 +24,19 @@ For LMI, the **Resource** dimension on execution-environment metrics targets **f
 
 **Capacity provider (fleet) level**
 
-| Metric (names per AWS) | Use |
-| --- | --- |
+| Metric (names per AWS)                    | Use                                                   |
+| ----------------------------------------- | ----------------------------------------------------- |
 | **CPUUtilization**, **MemoryUtilization** | Overall pressure across instances behind the provider |
-| **vCPUAvailable**, **MemoryAvailable** | Headroom still allocatable to environments |
-| **vCPUAllocated**, **MemoryAllocated** | What is already committed to execution environments |
+| **vCPUAvailable**, **MemoryAvailable**    | Headroom still allocatable to environments            |
+| **vCPUAllocated**, **MemoryAllocated**    | What is already committed to execution environments   |
 
 **Execution environment (function version) level**
 
-| Metric (names per AWS) | Use |
-| --- | --- |
-| **ExecutionEnvironmentConcurrency** | Observed concurrency (sampled over a window per AWS) |
-| **ExecutionEnvironmentConcurrencyLimit** | Ceiling per environment you configured |
-| **ExecutionEnvironmentCPUUtilization**, **ExecutionEnvironmentMemoryUtilization** | Whether that version is sized correctly |
+| Metric (names per AWS)                                                            | Use                                                  |
+| --------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| **ExecutionEnvironmentConcurrency**                                               | Observed concurrency (sampled over a window per AWS) |
+| **ExecutionEnvironmentConcurrencyLimit**                                          | Ceiling per environment you configured               |
+| **ExecutionEnvironmentCPUUtilization**, **ExecutionEnvironmentMemoryUtilization** | Whether that version is sized correctly              |
 
 ## Cadence and retention
 

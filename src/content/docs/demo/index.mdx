@@ -6,10 +6,11 @@ sidebar:
   label: Demo overview
 ---
 
-import { Aside, Steps, FileTree, Card, CardGrid } from '@astrojs/starlight/components';
+import { Aside, Steps, FileTree, Card, CardGrid } from "@astrojs/starlight/components";
 
 <Aside type="note">
-  Terraform code: [terraform-aws-lambda-managed-instance](https://github.com/jajera/terraform-aws-lambda-managed-instance).
+  Terraform code:
+  [terraform-aws-lambda-managed-instance](https://github.com/jajera/terraform-aws-lambda-managed-instance).
   All demo resources live under `examples/waf-loki/`.
 </Aside>
 
@@ -35,35 +36,33 @@ This demo wires together every concept from the walkthrough into one running pip
 
 <CardGrid>
   <Card title="S3 trigger" icon="seti:json">
-    Any `.gz` object put to the WAF log bucket fires an S3 event notification directly to the LMI Lambda. No SQS or EventBridge needed for this volume.
+    Any `.gz` object put to the WAF log bucket fires an S3 event notification directly to the LMI
+    Lambda. No SQS or EventBridge needed for this volume.
   </Card>
   <Card title="Lambda Managed Instance" icon="rocket">
-    The Node.js 24 WAF ingest function runs on a `lambda_managed_instance` capacity provider with VPC placement and the LMI security group.
+    The Node.js 24 WAF ingest function runs on a `lambda_managed_instance` capacity provider with
+    VPC placement and the LMI security group.
   </Card>
   <Card title="Loki on EC2" icon="linux">
-    Monolithic Loki (Docker Compose) on a single `t3.small` in a private subnet. Chunks and index persist on the root EBS volume. Lambda reaches Loki on port 3100 via the LMI security group rule.
+    Monolithic Loki (Docker Compose) on a single `t3.small` in a private subnet. Chunks and index
+    persist on the root EBS volume. Lambda reaches Loki on port 3100 via the LMI security group
+    rule.
   </Card>
   <Card title="Grafana via ALB" icon="external">
-    A public ALB forwards HTTP 80 to Grafana port 3000. Access is locked to your current deployer IP by default. Default credentials: **admin / admin**.
+    A public ALB forwards HTTP 80 to Grafana port 3000. Access is locked to your current deployer IP
+    by default. Default credentials: **admin / admin**.
   </Card>
 </CardGrid>
 
 ## Repository layout
 
 <FileTree>
-- examples/
-  - waf-loki/
-    - main.tf              # VPC, LMI, WAF Lambda module, S3, EC2, ALB
-    - variables.tf         # waf_logs_bucket_name (required), waf_logs_prefix, web_acl_arn, …
-    - outputs.tf           # grafana_url, waf_logs_bucket, obs_instance_id, loki_push_url
-    - versions.tf          # aws, archive, http providers
-    - function-waf/        # Node.js 24 WAF ingest handler
-      - index.mjs
-      - package.json
-    - templates/
-      - user_data.sh.tftpl # EC2 bootstrap (Terraform templatefile + base64 dashboards)
-      - dashboards/        # waf.json, waf-overview.json → injected into user_data at apply
-    - README.md
+  - examples/ - waf-loki/ - main.tf # VPC, LMI, WAF Lambda module, S3, EC2, ALB - variables.tf #
+  waf_logs_bucket_name (required), waf_logs_prefix, web_acl_arn, … - outputs.tf # grafana_url,
+  waf_logs_bucket, obs_instance_id, loki_push_url - versions.tf # aws, archive, http providers -
+  function-waf/ # Node.js 24 WAF ingest handler - index.mjs - package.json - templates/ -
+  user_data.sh.tftpl # EC2 bootstrap (Terraform templatefile + base64 dashboards) - dashboards/ #
+  waf.json, waf-overview.json → injected into user_data at apply - README.md
 </FileTree>
 
 ## Apply

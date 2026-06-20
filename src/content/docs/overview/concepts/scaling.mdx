@@ -5,7 +5,7 @@ sidebar:
   label: Elasticity & CPU
 ---
 
-import { Aside } from '@astrojs/starlight/components';
+import { Aside } from "@astrojs/starlight/components";
 
 LMI scales **asynchronously** from **CPU utilisation**, not from "one more request arrived." There are **no cold starts** in the default-Lambda sense: invocations use **already running** execution environments on the fleet ([AWS comparison table](https://docs.aws.amazon.com/lambda/latest/dg/lambda-managed-instances.html)).
 
@@ -32,16 +32,14 @@ LMI scales **asynchronously** from **CPU utilisation**, not from "one more reque
 
 Do not conflate **EC2 instances** with **Lambda execution environments**:
 
-| Layer | Role |
-| --- | --- |
-| **Managed instances** | EC2 hosts Lambda runs for your capacity provider (resiliency across AZs). |
+| Layer                      | Role                                                                                                                         |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **Managed instances**      | EC2 hosts Lambda runs for your capacity provider (resiliency across AZs).                                                    |
 | **Execution environments** | Runtimes that execute your function code **on** that capacity; **multi-concurrency** packs many invocations per environment. |
 
 With **no traffic**, AWS describes LMI as scaling to **minimum execution environments configured** — you still have **baseline instance capacity**; environments can **idle** on that capacity. Align details with the **Scaling behavior** row in the [official comparison table](https://docs.aws.amazon.com/lambda/latest/dg/lambda-managed-instances.html).
 
-<Aside type="note">
-  Diagram pending — PNG version coming. ASCII above is a conceptual sketch.
-</Aside>
+<Aside type="note">Diagram pending — PNG version coming. ASCII above is a conceptual sketch.</Aside>
 
 ## See also
 

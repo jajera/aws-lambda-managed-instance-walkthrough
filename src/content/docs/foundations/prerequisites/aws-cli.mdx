@@ -5,16 +5,16 @@ sidebar:
   label: AWS CLI
 ---
 
-import { Steps, Aside, Tabs, TabItem, Badge } from '@astrojs/starlight/components';
-import Checklist from '@/components/Checklist.astro';
-import Tooltip from '@/components/Tooltip.astro';
+import { Steps, Aside, Tabs, TabItem, Badge } from "@astrojs/starlight/components";
+import Checklist from "@/components/Checklist.astro";
+import Tooltip from "@/components/Tooltip.astro";
 
 <Checklist
   id="prereq-aws-cli"
   items={[
-    'AWS CLI v2 installed',
-    'Credentials configured (IAM user or SSO)',
-    'aws sts get-caller-identity returns expected account and identity',
+    "AWS CLI v2 installed",
+    "Credentials configured (IAM user or SSO)",
+    "aws sts get-caller-identity returns expected account and identity",
   ]}
 />
 
@@ -22,116 +22,122 @@ The AWS CLI is how you authenticate to <Tooltip term="aws" /> from your machine.
 
 <Steps>
 
-1. **Install the AWS CLI.** <Badge text="Required" variant="tip" size="small" />
+1.  **Install the AWS CLI.** <Badge text="Required" variant="tip" size="small" />
 
-   <Tabs syncKey="os">
-     <TabItem label="macOS">
-      ```bash frame="terminal" title="Install via Homebrew"
-      brew install awscli
-      ```
-     </TabItem>
-     <TabItem label="Linux">
-      If needed, install `unzip` and `curl` first (for example `sudo apt install -y unzip curl` or `sudo dnf install -y unzip curl`).
-
-      ```bash frame="terminal" title="Install via curl"
-      curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-      unzip awscliv2.zip
-      sudo ./aws/install --update
-      ```
-
-      For ARM (for example Graviton or Raspberry Pi):
-
-      ```bash frame="terminal"
-      curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
-      unzip awscliv2.zip
-      sudo ./aws/install --update
-      ```
-     </TabItem>
-   </Tabs>
-
-   Verify the installation:
-
-   ```bash frame="terminal"
-   aws --version
+       <Tabs syncKey="os">
+  <TabItem label="macOS">
+   ```bash frame="terminal" title="Install via Homebrew"
+   brew install awscli
    ```
+  </TabItem>
+  <TabItem label="Linux">
+   If needed, install `unzip` and `curl` first (for example `sudo apt install -y unzip curl` or `sudo dnf install -y unzip curl`).
 
-   You should see `aws-cli/2.x.x` - version 2 is required.
+    ```bash frame="terminal" title="Install via curl"
+    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+    unzip awscliv2.zip
+    sudo ./aws/install --update
+    ```
 
-2. **Configure AWS access.** <Badge text="Required" variant="tip" size="small" />
+    For ARM (for example Graviton or Raspberry Pi):
 
-   Choose the path that matches how you set up access in the previous steps.
+    ```bash frame="terminal"
+    curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
+    unzip awscliv2.zip
+    sudo ./aws/install --update
+    ```
 
-   <Tabs syncKey="credential-type">
-     <TabItem label="IAM user (access keys)">
-      You need the Access Key ID and Secret Access Key you created in the [AWS Account](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/aws-account/) step.
+         </TabItem>
 
-      ```bash frame="terminal"
-      aws configure
-      ```
+    </Tabs>
 
-      Enter the following when prompted:
-      - **AWS Access Key ID** - the key ID (starts with `AKIA...`)
-      - **AWS Secret Access Key** - the secret
-      - **Default region name** - the region you chose (for example `ap-southeast-2`)
-      - **Default output format** - `json`
+    Verify the installation:
 
-      This writes credentials to `~/.aws/credentials` and config to `~/.aws/config`.
-     </TabItem>
-     <TabItem label="IAM Identity Center (SSO)">
-      If you completed the [IAM Identity Center](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/iam-identity-center/) step, your profile is already configured. Log in:
+    ```bash frame="terminal"
+    aws --version
+    ```
 
-      ```bash frame="terminal"
-      aws sso login --profile lmi-walkthrough
-      ```
+    You should see `aws-cli/2.x.x` - version 2 is required.
 
-      To avoid typing `--profile` on every command, set the profile as your shell default:
+2.  **Configure AWS access.** <Badge text="Required" variant="tip" size="small" />
 
-      ```bash frame="terminal"
-      export AWS_PROFILE=lmi-walkthrough
-      ```
+    Choose the path that matches how you set up access in the previous steps.
 
-      Add the export to `~/.bashrc` or `~/.zshrc` to persist it across sessions.
+       <Tabs syncKey="credential-type">
+  <TabItem label="IAM user (access keys)">
+   You need the Access Key ID and Secret Access Key you created in the [AWS Account](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/aws-account/) step.
 
-      SSO sessions expire (typically after 1-8 hours depending on your permission set). Re-run `aws sso login` when the session expires.
-     </TabItem>
-   </Tabs>
+    ```bash frame="terminal"
+    aws configure
+    ```
 
-3. **Verify access.** <Badge text="Required" variant="tip" size="small" />
+    Enter the following when prompted:
+    - **AWS Access Key ID** - the key ID (starts with `AKIA...`)
+    - **AWS Secret Access Key** - the secret
+    - **Default region name** - the region you chose (for example `ap-southeast-2`)
+    - **Default output format** - `json`
 
-   ```bash frame="terminal"
-   aws sts get-caller-identity
-   ```
+    This writes credentials to `~/.aws/credentials` and config to `~/.aws/config`.
 
-   Expected output:
+         </TabItem>
 
-   ```json
-   {
-     "UserId": "AIDA...",
-     "Account": "123456789012",
-     "Arn": "arn:aws:iam::123456789012:user/lmi-admin"
-   }
-   ```
+      <TabItem label="IAM Identity Center (SSO)">
+   If you completed the [IAM Identity Center](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/iam-identity-center/) step, your profile is already configured. Log in:
 
-   For IAM Identity Center the ARN will contain `assumed-role` instead of `user`. Either is correct as long as the account ID matches your account.
+    ```bash frame="terminal"
+    aws sso login --profile lmi-walkthrough
+    ```
 
-   <Aside type="caution">
-     If the command returns an error like `Unable to locate credentials`, re-run `aws configure`
-     (IAM user) or `aws sso login` (SSO) and try again.
-   </Aside>
+    To avoid typing `--profile` on every command, set the profile as your shell default:
 
-4. **Confirm the default region.**
+    ```bash frame="terminal"
+    export AWS_PROFILE=lmi-walkthrough
+    ```
 
-   ```bash frame="terminal"
-   aws configure get region
-   ```
+    Add the export to `~/.bashrc` or `~/.zshrc` to persist it across sessions.
 
-   The output should match the region you chose. If it is blank or wrong, set it:
+    SSO sessions expire (typically after 1-8 hours depending on your permission set). Re-run `aws sso login` when the session expires.
 
-   ```bash frame="terminal"
-   aws configure set region ap-southeast-2
-   ```
+         </TabItem>
 
-   Replace `ap-southeast-2` with your region if different.
+    </Tabs>
+
+3.  **Verify access.** <Badge text="Required" variant="tip" size="small" />
+
+    ```bash frame="terminal"
+    aws sts get-caller-identity
+    ```
+
+    Expected output:
+
+    ```json
+    {
+      "UserId": "AIDA...",
+      "Account": "123456789012",
+      "Arn": "arn:aws:iam::123456789012:user/lmi-admin"
+    }
+    ```
+
+    For IAM Identity Center the ARN will contain `assumed-role` instead of `user`. Either is correct as long as the account ID matches your account.
+
+    <Aside type="caution">
+      If the command returns an error like `Unable to locate credentials`, re-run `aws configure`
+      (IAM user) or `aws sso login` (SSO) and try again.
+    </Aside>
+
+4.  **Confirm the default region.**
+
+    ```bash frame="terminal"
+    aws configure get region
+    ```
+
+    The output should match the region you chose. If it is blank or wrong, set it:
+
+    ```bash frame="terminal"
+    aws configure set region ap-southeast-2
+    ```
+
+    Replace `ap-southeast-2` with your region if different.
 
 </Steps>
 
