@@ -3,7 +3,7 @@ import starlight from "@astrojs/starlight";
 import starlightThemeVintage from "starlight-theme-vintage";
 import Icons from "unplugin-icons/vite";
 
-const siteBase = "/aws-lambda-managed-instance-walkthrough";
+const siteBase = "";
 
 const prereqRedirect = (slug) => ({
   status: 301,
@@ -11,7 +11,7 @@ const prereqRedirect = (slug) => ({
 });
 
 export default defineConfig({
-  site: "https://jajera.github.io",
+  site: "https://aws-lambda-managed-instance-walkthrough.johna.kiwi",
   base: siteBase,
   redirects: {
     "/walkthrough/prerequisites": {
