@@ -13,7 +13,7 @@ npm ci
 npm run dev
 ```
 
-Open the URL printed in the terminal (typically `http://localhost:4321/aws-lambda-managed-instance-walkthrough/`). Edits under `src/content/docs/` hot-reload.
+Open the URL printed in the terminal (typically `http://localhost:4321/`). Edits under `src/content/docs/` hot-reload.
 
 ## Scripts
 
