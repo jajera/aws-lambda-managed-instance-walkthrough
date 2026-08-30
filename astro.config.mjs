@@ -34,6 +34,9 @@ export default defineConfig({
       favicon: "/favicon.svg",
       description:
         "Terraform-first walkthrough for AWS Lambda Managed Instances — capacity provider, VPC, and how LMI differs from default Lambda.",
+      components: {
+        Head: "./src/components/Head.astro",
+      },
       plugins: [starlightThemeVintage()],
       customCss: ["./src/styles/splash-overrides.css"],
       social: [
