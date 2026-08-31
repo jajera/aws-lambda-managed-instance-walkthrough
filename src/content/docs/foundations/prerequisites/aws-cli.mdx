@@ -68,7 +68,7 @@ The AWS CLI is how you authenticate to <Tooltip term="aws" /> from your machine.
    <Tabs syncKey="credential-type">
      <TabItem label="IAM user (access keys)">
 
-     You need the Access Key ID and Secret Access Key you created in the [AWS Account](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/aws-account/) step.
+     You need the Access Key ID and Secret Access Key you created in the [AWS Account](/foundations/prerequisites/aws-account/) step.
 
      ```bash frame="terminal"
      aws configure
@@ -85,7 +85,7 @@ The AWS CLI is how you authenticate to <Tooltip term="aws" /> from your machine.
      </TabItem>
      <TabItem label="IAM Identity Center (SSO)">
 
-     If you completed the [IAM Identity Center](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/iam-identity-center/) step, your profile is already configured. Log in:
+     If you completed the [IAM Identity Center](/foundations/prerequisites/iam-identity-center/) step, your profile is already configured. Log in:
 
      ```bash frame="terminal"
      aws sso login --profile lmi-walkthrough
@@ -145,4 +145,4 @@ The AWS CLI is how you authenticate to <Tooltip term="aws" /> from your machine.
 
 ## Next step
 
-Continue to [Terraform](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/terraform/) to install the infrastructure-as-code tool.
+Continue to [Terraform](/foundations/prerequisites/terraform/) to install the infrastructure-as-code tool.

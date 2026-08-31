@@ -24,7 +24,7 @@ All infrastructure in this walkthrough - VPC, subnets, <Tooltip term="capacity-p
 - The full environment can be torn down with one command (`terraform destroy`)
 - State tracks what has been created so incremental updates are safe
 
-This site expects the **HashiCorp AWS provider `~> 6.0`** so resources such as `aws_lambda_capacity_provider` and `capacity_provider_config` on `aws_lambda_function` are available. The Terraform code lives in a **separate repository** ([terraform-aws-lambda-managed-instance](https://github.com/jajera/terraform-aws-lambda-managed-instance)). You will clone it in the [Git](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/git/) step.
+This site expects the **HashiCorp AWS provider `~> 6.0`** so resources such as `aws_lambda_capacity_provider` and `capacity_provider_config` on `aws_lambda_function` are available. The Terraform code lives in a **separate repository** ([terraform-aws-lambda-managed-instance](https://github.com/jajera/terraform-aws-lambda-managed-instance)). You will clone it in the [Git](/foundations/prerequisites/git/) step.
 
 <Steps>
 
@@ -100,7 +100,7 @@ This site expects the **HashiCorp AWS provider `~> 6.0`** so resources such as `
    cd ~/workspace
    ```
 
-   You will clone the Terraform repo into this directory in the [Git](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/git/) step.
+   You will clone the Terraform repo into this directory in the [Git](/foundations/prerequisites/git/) step.
 
 4. **Understand the state setup.**
 
@@ -108,7 +108,7 @@ This site expects the **HashiCorp AWS provider `~> 6.0`** so resources such as `
 
    This walkthrough uses **local state** - Terraform writes a `terraform.tfstate` file in the working directory. That is fine for a solo walkthrough on your own machine.
 
-   For production use or shared team access, move to **remote state** (for example S3 + DynamoDB backend) so state is stored safely and multiple people or CI can apply changes without conflicts. The [What else](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/what-else/) page has notes on this.
+   For production use or shared team access, move to **remote state** (for example S3 + DynamoDB backend) so state is stored safely and multiple people or CI can apply changes without conflicts. The [What else](/foundations/prerequisites/what-else/) page has notes on this.
 
    </Aside>
 
@@ -116,4 +116,4 @@ This site expects the **HashiCorp AWS provider `~> 6.0`** so resources such as `
 
 ## Next step
 
-Continue to [Git](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/git/) to install Git, set your identity, and clone the Terraform repo.
+Continue to [Git](/foundations/prerequisites/git/) to install Git, set your identity, and clone the Terraform repo.

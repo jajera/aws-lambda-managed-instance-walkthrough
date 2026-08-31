@@ -1,5 +1,17 @@
-export const glossary: Record<string, string> = {
-  aws: "Amazon Web Services — the cloud platform used throughout this walkthrough.",
+export type GlossaryEntry =
+  | string
+  | {
+      definition: string;
+      url?: string;
+      urlLabel?: string;
+    };
+
+export const glossary: Record<string, GlossaryEntry> = {
+  aws: {
+    definition: "Amazon Web Services — the cloud platform used throughout this walkthrough.",
+    url: "https://aws.amazon.com/",
+    urlLabel: "AWS",
+  },
   az: "Availability Zone — an isolated data-centre location within an AWS region used for high availability.",
   cidr: "Classless Inter-Domain Routing — the IP address range notation (e.g. 10.0.0.0/16) used to define VPC and subnet sizes.",
   cli: "Command Line Interface — a text-based interface used to interact with systems and tools by running commands in a terminal.",
@@ -14,14 +26,22 @@ export const glossary: Record<string, string> = {
   "iam-identity-center":
     "IAM Identity Center — AWS service for centralised workforce access, SSO, and short-lived credentials to AWS accounts (formerly AWS SSO).",
   igw: "Internet Gateway — the VPC attachment that enables public subnets to communicate with the internet.",
-  lambda:
-    "AWS Lambda — a serverless compute service that runs code in response to events without provisioning servers.",
+  lambda: {
+    definition:
+      "AWS Lambda — a serverless compute service that runs code in response to events without provisioning servers.",
+    url: "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html",
+    urlLabel: "Lambda docs",
+  },
   loki: "Grafana Loki — a log aggregation system that stores logs as compressed streams indexed by labels, designed to work with Grafana.",
   oidc: "OpenID Connect — an identity layer on OAuth 2.0; some tools use OIDC with IAM Identity Center for temporary AWS credentials without long-lived keys.",
   logql:
     "LogQL — the Grafana Loki query language, similar to PromQL, used to filter and aggregate log streams by label and content.",
-  "managed-instances":
-    "Lambda Managed Instances — a Lambda execution mode where functions run on dedicated EC2-backed instances in your VPC, providing higher concurrency (up to 64 req/vCPU), more memory (up to 32 GiB), and predictable resource isolation.",
+  "managed-instances": {
+    definition:
+      "Lambda Managed Instances — a Lambda execution mode where functions run on dedicated EC2-backed instances in your VPC, providing higher concurrency (up to 64 req/vCPU), more memory (up to 32 GiB), and predictable resource isolation.",
+    url: "https://docs.aws.amazon.com/lambda/latest/dg/lambda-managed-instances.html",
+    urlLabel: "Managed Instances docs",
+  },
   nat: "NAT Gateway — allows instances in private subnets to reach the internet without being directly reachable from it.",
   nodejs:
     "Node.js — the JavaScript runtime used for the Lambda handler in this walkthrough (version 24.x, async/await only).",
@@ -30,10 +50,26 @@ export const glossary: Record<string, string> = {
   sso: "Single sign-on — one login flow to access multiple applications; IAM Identity Center provides SSO into the AWS console and CLI.",
   subnet:
     "Subnet — a segment of a VPC CIDR block in a single Availability Zone; Lambda Managed Instances run in private subnets.",
-  terraform:
-    "Terraform — the infrastructure-as-code tool used to create and manage all AWS resources in this walkthrough.",
+  terraform: {
+    definition:
+      "Terraform — the infrastructure-as-code tool used to create and manage all AWS resources in this walkthrough.",
+    url: "https://developer.hashicorp.com/terraform",
+    urlLabel: "Terraform docs",
+  },
   vpc: "Virtual Private Cloud — an isolated, private network in AWS where your Lambda Managed Instances and related resources run.",
   waf: "AWS Web Application Firewall — a managed firewall service that filters HTTP/S traffic; its access logs are the input to the demo pipeline.",
   "web-acl":
     "Web ACL — a Web Application Firewall access control list; a named set of rules that WAF evaluates against incoming requests.",
 };
+
+export function resolveGlossaryEntry(entry: GlossaryEntry | undefined) {
+  if (!entry) return { definition: undefined, url: undefined, urlLabel: undefined };
+  if (typeof entry === "string") {
+    return { definition: entry, url: undefined, urlLabel: undefined };
+  }
+  return {
+    definition: entry.definition,
+    url: entry.url,
+    urlLabel: entry.urlLabel ?? entry.url,
+  };
+}
