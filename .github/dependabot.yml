@@ -11,6 +11,9 @@ updates:
     ignore:
       - dependency-name: "typescript"
         update-types: ["version-update:semver-major"]
+      # js-yaml 5 is ESM-only; Astro still imports default — keep on 4.x via overrides
+      - dependency-name: "js-yaml"
+        update-types: ["version-update:semver-major"]
     groups:
       production:
         dependency-type: production
