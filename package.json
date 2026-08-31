@@ -15,8 +15,8 @@
     "test": "vitest --run"
   },
   "dependencies": {
-    "@astrojs/starlight": "^0.37.0",
-    "astro": "^5.0.0",
+    "@astrojs/starlight": "^0.41.10",
+    "astro": "^7.2.9",
     "starlight-theme-vintage": "^0.1.0",
     "zod": "^3.25.76"
   },
