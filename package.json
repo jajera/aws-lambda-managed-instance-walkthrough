@@ -7,9 +7,10 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "npm run generate:og-image && astro build",
     "preview": "astro preview",
     "validate": "tsx scripts/validate-content.ts",
+    "generate:og-image": "tsx scripts/generate-og-image.ts",
     "format": "prettier --write .",
     "lint": "markdownlint-cli2 \"src/**/*.mdx\"",
     "test": "vitest --run"
@@ -17,7 +18,7 @@
   "dependencies": {
     "@astrojs/starlight": "^0.37.0",
     "astro": "^5.0.0",
-    "starlight-theme-vintage": "^0.1.0",
+    "sharp": "^0.34.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {
@@ -27,7 +28,7 @@
     "markdownlint-cli2": "^0.22.1",
     "prettier": "^3.5.0",
     "tsx": "^4.19.0",
-    "typescript": "^5.8.0",
+    "typescript": "~5.9.3",
     "unplugin-icons": "^23.0.1",
     "vitest": "^3.1.0"
   }

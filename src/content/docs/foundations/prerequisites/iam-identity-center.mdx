@@ -30,11 +30,11 @@ Why use it:
 - Free for internal users; scalable and audit-friendly.
 - Fits teams and workflows that already standardise on <Tooltip term="oidc" label="OIDC" /> and IAM Identity Center for temporary AWS credentials.
 
-You need one-time root (or admin) access to enable IAM Identity Center; MFA on the root user is recommended (see [AWS Account](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/aws-account/)).
+You need one-time root (or admin) access to enable IAM Identity Center; MFA on the root user is recommended (see [AWS Account](/foundations/prerequisites/aws-account/)).
 
 <Aside type="tip">
   If you prefer a plain IAM user with access keys, you can skip this page and continue with [AWS
-  CLI](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/aws-cli/).
+  CLI](/foundations/prerequisites/aws-cli/).
 </Aside>
 
 <Steps>
@@ -44,7 +44,7 @@ You need one-time root (or admin) access to enable IAM Identity Center; MFA on t
     In the AWS Console, search for **IAM Identity Center** (or find it under Security, Identity and Compliance).
     - Click **Enable**
     - On the identity source prompt, keep the default: **Identity Center directory** (unless you already have an external IdP such as Okta or Azure AD; connect it here if so)
-    - Choose the same region you selected in the [AWS Account](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/aws-account/) step. IAM Identity Center is a regional service; the region you enable it in is where the service runs
+    - Choose the same region you selected in the [AWS Account](/foundations/prerequisites/aws-account/) step. IAM Identity Center is a regional service; the region you enable it in is where the service runs
 
     <Aside type="note">
       If you see "IAM Identity Center is already enabled", someone (or a prior setup) has already
@@ -91,7 +91,7 @@ You need one-time root (or admin) access to enable IAM Identity Center; MFA on t
 
 7.  **Configure the AWS CLI to use IAM Identity Center.** <Badge text="Required if using SSO" variant="tip" size="small" />
 
-    Requires **AWS CLI v2** (see [AWS CLI](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/aws-cli/) to install). After the CLI is installed, run:
+    Requires **AWS CLI v2** (see [AWS CLI](/foundations/prerequisites/aws-cli/) to install). After the CLI is installed, run:
 
     ```bash frame="terminal"
     aws configure sso
@@ -155,4 +155,4 @@ You need one-time root (or admin) access to enable IAM Identity Center; MFA on t
 
 ## Next step
 
-Continue to [AWS CLI](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/aws-cli/) to install the CLI and confirm your credentials work.
+Continue to [AWS CLI](/foundations/prerequisites/aws-cli/) to install the CLI and confirm your credentials work.

@@ -20,8 +20,8 @@ import Checklist from "@/components/Checklist.astro";
 <Checklist
   id="walkthrough-lmi"
   items={[
-    "[VPC and networking](/aws-lambda-managed-instance-walkthrough/walkthrough/networking/) lab done or stack understood",
-    "Read [Placement & capacity](/aws-lambda-managed-instance-walkthrough/overview/concepts/capacity-providers/) — instance requirements and scaling mode are set here",
+    "[VPC and networking](/walkthrough/networking/) lab done or stack understood",
+    "Read [Placement & capacity](/overview/concepts/capacity-providers/) — instance requirements and scaling mode are set here",
     "`examples/waf-loki` cloned and `terraform init` succeeds",
   ]}
 />
@@ -30,7 +30,7 @@ import Checklist from "@/components/Checklist.astro";
 
 The walkthrough VPC lab provisions subnets and a security group. This module builds the **capacity provider** side: the operator IAM role, the **`aws_lambda_capacity_provider`** (VPC placement, instance requirements, scaling), and the service-linked role that lets Lambda manage EC2 fleet lifecycle.
 
-The Lambda function itself — execution role, log group, and `aws_lambda_function` — lives in the next lab: [Lambda Managed Function](/aws-lambda-managed-instance-walkthrough/walkthrough/lambda/).
+The Lambda function itself — execution role, log group, and `aws_lambda_function` — lives in the next lab: [Lambda Managed Function](/walkthrough/lambda/).
 
 Sections follow the comment groups in **`examples/waf-loki/main.tf`**. Code blocks use **illustrative literals** so you can read the shape without tracing variables.
 
@@ -50,7 +50,7 @@ permissions_config {
 }
 ```
 
-Further reading: [IAM roles](/aws-lambda-managed-instance-walkthrough/overview/concepts/operator-role/) (execution vs operator).
+Further reading: [IAM roles](/overview/concepts/operator-role/) (execution vs operator).
 
 ## Capacity provider and scaling
 
@@ -71,7 +71,7 @@ Further reading: [IAM roles](/aws-lambda-managed-instance-walkthrough/overview/c
   }
 ```
 
-Further reading: [Placement & capacity](/aws-lambda-managed-instance-walkthrough/overview/concepts/capacity-providers/), [Elasticity & CPU](/aws-lambda-managed-instance-walkthrough/overview/concepts/scaling/), [Supported instance families](/aws-lambda-managed-instance-walkthrough/overview/concepts/capacity-providers/#supported-instance-families).
+Further reading: [Placement & capacity](/overview/concepts/capacity-providers/), [Elasticity & CPU](/overview/concepts/scaling/), [Supported instance families](/overview/concepts/capacity-providers/#supported-instance-families).
 
 ## VPC placement
 
@@ -84,7 +84,7 @@ Further reading: [Placement & capacity](/aws-lambda-managed-instance-walkthrough
   }
 ```
 
-[VPC lab](/aws-lambda-managed-instance-walkthrough/walkthrough/networking/) wires **`aws_security_group.lmi`** and private subnets passed in here.
+[VPC lab](/walkthrough/networking/) wires **`aws_security_group.lmi`** and private subnets passed in here.
 
 ## Tags
 
@@ -114,22 +114,22 @@ Further reading: [Placement & capacity](/aws-lambda-managed-instance-walkthrough
 <CardGrid>
   <LinkCard
     title="Lambda Managed Function"
-    href="/aws-lambda-managed-instance-walkthrough/walkthrough/lambda/"
+    href="/walkthrough/lambda/"
     description="Execution role, log group, and the function wired to this capacity provider."
   />
   <LinkCard
     title="VPC and networking"
-    href="/aws-lambda-managed-instance-walkthrough/walkthrough/networking/"
+    href="/walkthrough/networking/"
     description="Subnets, NAT, and the LMI security group used as inputs here."
   />
   <LinkCard
     title="Decision guide & reference"
-    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/reference/"
+    href="/overview/concepts/reference/"
     description="Trade-offs, pattern cards, and neutral implementation outline."
   />
   <LinkCard
     title="Quotas"
-    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/quotas/"
+    href="/overview/concepts/quotas/"
     description="Account and capacity provider limits that affect scale."
   />
 </CardGrid>

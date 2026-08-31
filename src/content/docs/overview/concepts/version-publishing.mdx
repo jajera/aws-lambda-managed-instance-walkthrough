@@ -28,12 +28,12 @@ Publishing is a **versioned** milestone: until the version is **ACTIVE**, it is 
 | **Managed instances**       | Lambda starts **managed instances** in your account. By default AWS uses **three instances** for **Availability Zone** resiliency and brings up **three execution environments** before marking the version **ACTIVE**. |
 | **Reuse on busy providers** | If the capacity provider **already** runs other functions, Lambda **may** host the new version’s environments on **existing** instances when spare capacity exists, instead of adding instances.                        |
 
-For the three-step overview in narrative form, see [Introduction](/aws-lambda-managed-instance-walkthrough/overview/).
+For the three-step overview in narrative form, see [Introduction](/overview/).
 
 <Aside type="caution">
   `capacity_provider_config` cannot be added or removed after the function is first created. Decide
   whether the function runs on LMI before you create that function. See also [Placement &
-  capacity](/aws-lambda-managed-instance-walkthrough/overview/concepts/capacity-providers/).
+  capacity](/overview/concepts/capacity-providers/).
 </Aside>
 
 ## See also
@@ -41,17 +41,17 @@ For the three-step overview in narrative form, see [Introduction](/aws-lambda-ma
 <CardGrid>
   <LinkCard
     title="Placement & capacity"
-    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/capacity-providers/"
+    href="/overview/concepts/capacity-providers/"
     description="What you configure on the provider before a version can land on managed instances."
   />
   <LinkCard
     title="Elasticity & CPU"
-    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/scaling/"
+    href="/overview/concepts/scaling/"
     description="How fleet size and execution environments respond after capacity is live."
   />
   <LinkCard
     title="Concurrency & runtimes"
-    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/execution-environment/"
+    href="/overview/concepts/execution-environment/"
     description="What multiple execution environments imply for multi-concurrency and runtimes."
   />
 </CardGrid>

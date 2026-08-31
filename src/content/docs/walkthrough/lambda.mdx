@@ -22,15 +22,15 @@ import LambdaInvocationTriggersDiagram from "@/components/LambdaInvocationTrigge
 <Checklist
   id="walkthrough-lambda"
   items={[
-    "[LMI stack](/aws-lambda-managed-instance-walkthrough/walkthrough/lmi/) applied — `capacity_provider_arn` output is available",
-    "Read [Publishing & activation](/aws-lambda-managed-instance-walkthrough/overview/concepts/version-publishing/) — `capacity_provider_config` and `per_execution_environment_max_concurrency` are immutable after first create",
+    "[LMI stack](/walkthrough/lmi/) applied — `capacity_provider_arn` output is available",
+    "Read [Publishing & activation](/overview/concepts/version-publishing/) — `capacity_provider_config` and `per_execution_environment_max_concurrency` are immutable after first create",
     "`examples/waf-loki` cloned and `terraform init` succeeds",
   ]}
 />
 
 ## Overview
 
-The [LMI stack lab](/aws-lambda-managed-instance-walkthrough/walkthrough/lmi/) provisions the capacity provider. This module builds the **function side**: the execution IAM role, a pre-created CloudWatch log group, and a **published** `aws_lambda_function` with `capacity_provider_config` pointing at the provider ARN.
+The [LMI stack lab](/walkthrough/lmi/) provisions the capacity provider. This module builds the **function side**: the execution IAM role, a pre-created CloudWatch log group, and a **published** `aws_lambda_function` with `capacity_provider_config` pointing at the provider ARN.
 
 Code blocks use **illustrative literals** so you can read the shape without tracing variables. Compare with **`examples/waf-loki`** (`lambda_managed_function_waf` in **`main.tf`**) when you apply.
 
@@ -54,7 +54,7 @@ description           = "Example Lambda Managed Instance function"
 capacity_provider_arn = "arn:aws:lambda:us-east-1:111122223333:capacity-provider/demo-capacity"
 ```
 
-Further reading: [IAM roles](/aws-lambda-managed-instance-walkthrough/overview/concepts/operator-role/) (execution vs operator).
+Further reading: [IAM roles](/overview/concepts/operator-role/) (execution vs operator).
 
 ## Deployment artifact
 
@@ -85,7 +85,7 @@ LMI minimum memory is **2048 MB**. **`architectures`** must match the capacity p
   }
 ```
 
-Further reading: [Concurrency & runtimes](/aws-lambda-managed-instance-walkthrough/overview/concepts/execution-environment/).
+Further reading: [Concurrency & runtimes](/overview/concepts/execution-environment/).
 
 ## Logging and log group
 
@@ -105,7 +105,7 @@ The module creates **`/aws/lambda/<function_name>`**, wires retention, and point
   }
 ```
 
-The module offers a **`cloudwatch_log_group_prevent_destroy`** flag; when `true`, `lifecycle.prevent_destroy` is set so `terraform destroy` cannot delete the log group. Further reading: [Monitoring](/aws-lambda-managed-instance-walkthrough/overview/concepts/monitoring/).
+The module offers a **`cloudwatch_log_group_prevent_destroy`** flag; when `true`, `lifecycle.prevent_destroy` is set so `terraform destroy` cannot delete the log group. Further reading: [Monitoring](/overview/concepts/monitoring/).
 
 ## Capacity provider link
 
@@ -131,7 +131,7 @@ resource "aws_iam_role_policy_attachment" "execution_extra" {
 }
 ```
 
-Further reading: [IAM roles](/aws-lambda-managed-instance-walkthrough/overview/concepts/operator-role/).
+Further reading: [IAM roles](/overview/concepts/operator-role/).
 
 ## Tags
 
@@ -167,7 +167,7 @@ The same map is applied to the execution role and CloudWatch log group. **`aws_l
 
    Expect the execution role and its attachments, the CloudWatch log group, the Lambda function with **`publish = true`** and **`capacity_provider_config`**, plus the example’s **`aws_lambda_permission`** and **`aws_s3_bucket_notification`** for the WAF ingest function.
 
-2. **Compare** your intended **`memory_size`**, **`per_execution_environment_max_concurrency`**, and capacity provider settings with [Publishing & activation](/aws-lambda-managed-instance-walkthrough/overview/concepts/version-publishing/) before **`terraform apply`**.
+2. **Compare** your intended **`memory_size`**, **`per_execution_environment_max_concurrency`**, and capacity provider settings with [Publishing & activation](/overview/concepts/version-publishing/) before **`terraform apply`**.
 
 3. **Apply** when the plan matches expectations. First publish can take several minutes while capacity becomes active.
 
@@ -240,36 +240,36 @@ From **`examples/waf-loki`**, run **`terraform destroy`** in the same workspace 
 
 The **WAF log bucket** is an **existing** bucket (referenced by **`waf_logs_bucket_name`**); this stack does **not** delete the bucket or its objects. Empty or delete the bucket yourself if you created it only for the lab. If **`web_acl_arn`** was set, destroy removes the **logging configuration** resource, not the Web ACL.
 
-For metrics, filters, and alarms, see **[Monitoring](/aws-lambda-managed-instance-walkthrough/overview/concepts/monitoring/)**; for how publishes relate to capacity, see **[Publishing & activation](/aws-lambda-managed-instance-walkthrough/overview/concepts/version-publishing/)**.
+For metrics, filters, and alarms, see **[Monitoring](/overview/concepts/monitoring/)**; for how publishes relate to capacity, see **[Publishing & activation](/overview/concepts/version-publishing/)**.
 
-That finishes the **current** lab sequence: **VPC and networking**, **LMI stack**, then **Lambda Managed Function**. Concept pages under **[LMI fundamentals](/aws-lambda-managed-instance-walkthrough/overview/concepts/)** remain the place for placement, scaling, and trade-offs. Further procedural labs will appear in the sidebar when those pages are enabled.
+That finishes the **current** lab sequence: **VPC and networking**, **LMI stack**, then **Lambda Managed Function**. Concept pages under **[LMI fundamentals](/overview/concepts/)** remain the place for placement, scaling, and trade-offs. Further procedural labs will appear in the sidebar when those pages are enabled.
 
 ## See also
 
 <CardGrid>
   <LinkCard
     title="Walkthrough"
-    href="/aws-lambda-managed-instance-walkthrough/walkthrough/"
+    href="/walkthrough/"
     description="Lab order and how this section fits the rest of the site."
   />
   <LinkCard
     title="LMI stack"
-    href="/aws-lambda-managed-instance-walkthrough/walkthrough/lmi/"
+    href="/walkthrough/lmi/"
     description="Capacity provider, operator role, VPC placement, and scaling — must apply first."
   />
   <LinkCard
     title="VPC and networking"
-    href="/aws-lambda-managed-instance-walkthrough/walkthrough/networking/"
+    href="/walkthrough/networking/"
     description="Subnets, NAT, and the LMI security group used by the capacity provider."
   />
   <LinkCard
     title="Decision guide & reference"
-    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/reference/"
+    href="/overview/concepts/reference/"
     description="Trade-offs, pattern cards, and neutral implementation outline."
   />
   <LinkCard
     title="Quotas"
-    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/quotas/"
+    href="/overview/concepts/quotas/"
     description="Account and capacity provider limits that affect scale."
   />
 </CardGrid>

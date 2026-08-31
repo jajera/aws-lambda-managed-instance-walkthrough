@@ -14,13 +14,13 @@ Use the `cursor-ide-browser` MCP tools to inspect rendered output in the running
 npm run dev
 ```
 
-The server starts at `http://localhost:4321`. Because the site is configured with `base: '/aws-lambda-managed-instance-walkthrough'`, the correct preview URL is:
+The server starts at `http://localhost:4321`. Because the site is configured with `base: '/'`, the correct preview URL is:
 
 ```plaintext
-http://localhost:4321/aws-lambda-managed-instance-walkthrough/
+http://localhost:4321/
 ```
 
-Always include the base path — navigating to `http://localhost:4321/` alone returns a 404.
+With `base: '/'`, the site root is `http://localhost:4321/`.
 
 ## MCP workflow
 
@@ -33,7 +33,7 @@ Always include the base path — navigating to `http://localhost:4321/` alone re
 2. **Navigate to a page** — supply the full URL including base path:
 
    ```plaintext
-   browser_navigate { url: "http://localhost:4321/aws-lambda-managed-instance-walkthrough/overview/" }
+   browser_navigate { url: "http://localhost:4321/overview/" }
    ```
 
 3. **Lock the browser** — after navigating, lock before any interactions:
@@ -66,12 +66,12 @@ Always include the base path — navigating to `http://localhost:4321/` alone re
 
 | Page | URL |
 | --- | --- |
-| Splash (home) | `http://localhost:4321/aws-lambda-managed-instance-walkthrough/` |
-| Introduction | `http://localhost:4321/aws-lambda-managed-instance-walkthrough/overview/` |
-| Foundations (overview) | `http://localhost:4321/aws-lambda-managed-instance-walkthrough/foundations/` |
-| Prerequisites | `http://localhost:4321/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/` |
-| LMI fundamentals (hub / concept map) | `http://localhost:4321/aws-lambda-managed-instance-walkthrough/overview/concepts/` |
-| Example topic | `http://localhost:4321/aws-lambda-managed-instance-walkthrough/overview/concepts/security/` |
+| Splash (home) | `http://localhost:4321/` |
+| Introduction | `http://localhost:4321/overview/` |
+| Foundations (overview) | `http://localhost:4321/foundations/` |
+| Prerequisites | `http://localhost:4321/foundations/prerequisites/` |
+| LMI fundamentals (hub / concept map) | `http://localhost:4321/overview/concepts/` |
+| Example topic | `http://localhost:4321/overview/concepts/security/` |
 
 ## Wait strategy
 

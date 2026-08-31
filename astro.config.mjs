@@ -1,22 +1,19 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
-import starlightThemeVintage from "starlight-theme-vintage";
 import Icons from "unplugin-icons/vite";
-
-const siteBase = "";
 
 const prereqRedirect = (slug) => ({
   status: 301,
-  destination: `${siteBase}/foundations/prerequisites/${slug}`,
+  destination: `/foundations/prerequisites/${slug}`,
 });
 
 export default defineConfig({
   site: "https://aws-lambda-managed-instance-walkthrough.johna.kiwi",
-  base: siteBase,
+  base: "/",
   redirects: {
     "/walkthrough/prerequisites": {
       status: 301,
-      destination: `${siteBase}/foundations/prerequisites`,
+      destination: "/foundations/prerequisites",
     },
     "/walkthrough/prerequisites/aws-account": prereqRedirect("aws-account"),
     "/walkthrough/prerequisites/iam-identity-center": prereqRedirect("iam-identity-center"),
@@ -34,11 +31,11 @@ export default defineConfig({
       favicon: "/favicon.svg",
       description:
         "Terraform-first walkthrough for AWS Lambda Managed Instances — capacity provider, VPC, and how LMI differs from default Lambda.",
+      customCss: ["./src/styles/patina-tokens.css", "./src/styles/splash-overrides.css"],
       components: {
+        ThemeSelect: "./src/components/ThemeSelect.astro",
         Head: "./src/components/Head.astro",
       },
-      plugins: [starlightThemeVintage()],
-      customCss: ["./src/styles/splash-overrides.css"],
       social: [
         {
           icon: "github",
@@ -100,29 +97,8 @@ export default defineConfig({
             { slug: "walkthrough/networking" },
             { slug: "walkthrough/lmi" },
             { slug: "walkthrough/lambda" },
-            // { slug: 'iam' },
-            // { slug: 'capacity-provider' },
-            // { slug: 'lambda' },
-            // { slug: 'demo' },
-            // { slug: 'demo/handler' },
-            // { slug: 'demo/loki' },
-            // { slug: 'demo/grafana' },
           ],
         },
-        // {
-        //   label: 'Observability',
-        //   collapsed: true,
-        //   items: [
-        //     { slug: 'observability' },
-        //   ],
-        // },
-        // {
-        //   label: 'Appendix',
-        //   collapsed: true,
-        //   items: [
-        //     { slug: 'appendix' },
-        //   ],
-        // },
       ],
     }),
   ],

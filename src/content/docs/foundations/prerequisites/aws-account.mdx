@@ -48,8 +48,7 @@ This walkthrough creates a <Tooltip term="vpc" />, <Tooltip term="capacity-provi
    <Aside type="tip">
      If you prefer **short-lived credentials** and centralised users, set up **IAM Identity Center**
      and skip creating long-lived IAM user access keys. See the [IAM Identity
-     Center](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/iam-identity-center/)
-     page.
+     Center](/foundations/prerequisites/iam-identity-center/) page.
    </Aside>
 
    **IAM user path (simpler, access keys):**
@@ -58,7 +57,7 @@ This walkthrough creates a <Tooltip term="vpc" />, <Tooltip term="capacity-provi
    - Attach a policy — for the walkthrough use **AdministratorAccess** (or scope it to VPC, Lambda, IAM, EC2, S3, and related services you plan to use)
    - Under **Security credentials**: Create access key → choose **CLI** use case → note the Access Key ID and Secret Access Key
 
-   You will enter these into `aws configure` in the [AWS CLI](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/aws-cli/) step.
+   You will enter these into `aws configure` in the [AWS CLI](/foundations/prerequisites/aws-cli/) step.
 
 4. **Enable billing alerts.** <Badge text="Recommended" variant="note" size="small" />
 
@@ -83,4 +82,4 @@ This walkthrough creates a <Tooltip term="vpc" />, <Tooltip term="capacity-provi
 
 ## Next step
 
-Continue to [IAM Identity Center](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/iam-identity-center/) to set up centralised access and short-lived credentials, or skip ahead to [AWS CLI](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/aws-cli/) if you are using an IAM user with access keys only.
+Continue to [IAM Identity Center](/foundations/prerequisites/iam-identity-center/) to set up centralised access and short-lived credentials, or skip ahead to [AWS CLI](/foundations/prerequisites/aws-cli/) if you are using an IAM user with access keys only.

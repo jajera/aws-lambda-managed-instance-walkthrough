@@ -157,10 +157,10 @@ Starlight throws a build error if a sidebar `slug` references a page that is `dr
 
 ## Internal links and base path
 
-The site is built with `base: '/aws-lambda-managed-instance-walkthrough'` (see `astro.config.mjs`). All internal links **must** include this base path:
+The site is built with `base: '/'` (see `astro.config.mjs`). Use root-relative paths — do not prefix with the repo name:
 
-- **Correct:** `[IAM](/aws-lambda-managed-instance-walkthrough/iam/)`
-- **Wrong:** `[IAM](/iam/)` (missing base; will break in production)
+- **Correct:** `[IAM](/iam/)`
+- **Wrong:** `[IAM](/aws-lambda-managed-instance-walkthrough/iam/)` (legacy prefix; 404 under the custom domain)
 
 ## Theory-first pattern
 

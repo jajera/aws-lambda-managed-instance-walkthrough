@@ -35,13 +35,12 @@ import NetworkingVpcIpv4TrafficDiagram from "@/components/NetworkingVpcIpv4Traff
 
 Lambda Managed Instances run managed <Tooltip term="ec2" /> capacity in **your** <Tooltip term="vpc" />. In this repository, **`modules/vpc`** builds a small, repeatable layout: **public** <Tooltip term="subnet" />s for an <Tooltip term="igw" /> and a <Tooltip term="nat" /> gateway, **private** subnets for workloads, and route tables so private IPv4 egress goes through NAT. The walkthrough example also defines **`aws_security_group.lmi`**: a <Tooltip term="sg" /> attached to the <Tooltip term="capacity-provider" /> so ENIs can reach the Lambda control plane and CloudWatch Logs (egress allowed in the example).
 
-For **why** you might choose public subnets, endpoints, or NAT in production, read [VPC connectivity for Lambda Managed Instances](/aws-lambda-managed-instance-walkthrough/overview/concepts/networking/). For **placement** (subnets and security groups as the provider boundary), see [Placement & capacity](/aws-lambda-managed-instance-walkthrough/overview/concepts/capacity-providers/).
+For **why** you might choose public subnets, endpoints, or NAT in production, read [VPC connectivity for Lambda Managed Instances](/overview/concepts/networking/). For **placement** (subnets and security groups as the provider boundary), see [Placement & capacity](/overview/concepts/capacity-providers/).
 
 <Aside type="caution">
   `capacity_provider_config` cannot be added or removed after the function is first created. Plan
   your function configuration before the first `terraform apply` that creates the Lambda. See
-  [Publishing &
-  activation](/aws-lambda-managed-instance-walkthrough/overview/concepts/version-publishing/).
+  [Publishing & activation](/overview/concepts/version-publishing/).
 </Aside>
 
 ## Repository layout
@@ -63,7 +62,7 @@ Private subnets have no path from the internet **inbound** by default; outbound 
 
 1. **Finish prerequisites.** <Badge text="Required" variant="tip" size="small" />
 
-   Complete [Git](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/git/) (clone the Terraform repo), [Terraform](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/terraform/), and [What else](/aws-lambda-managed-instance-walkthrough/foundations/prerequisites/what-else/) — especially **one region** and matching **Availability Zones** for every resource.
+   Complete [Git](/foundations/prerequisites/git/) (clone the Terraform repo), [Terraform](/foundations/prerequisites/terraform/), and [What else](/foundations/prerequisites/what-else/) — especially **one region** and matching **Availability Zones** for every resource.
 
 2. **Open the walkthrough example directory.**
 
@@ -107,17 +106,17 @@ Private subnets have no path from the internet **inbound** by default; outbound 
 <CardGrid>
   <LinkCard
     title="Networking fundamentals"
-    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/networking/"
+    href="/overview/concepts/networking/"
     description="IGW, NAT, and VPC endpoints — choosing a connectivity pattern."
   />
   <LinkCard
     title="Placement & capacity"
-    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/capacity-providers/"
+    href="/overview/concepts/capacity-providers/"
     description="Subnets and security groups as the capacity provider boundary."
   />
   <LinkCard
     title="Tenancy & isolation"
-    href="/aws-lambda-managed-instance-walkthrough/overview/concepts/security/"
+    href="/overview/concepts/security/"
     description="Trust boundaries and VPC posture for LMI."
   />
 </CardGrid>
